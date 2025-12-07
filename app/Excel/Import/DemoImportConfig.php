@@ -7,9 +7,11 @@ namespace App\Excel\Import;
 use App\Excel\Import\Base\AbstractImportConfig;
 use App\Exception\BusinessException;
 use Hyperf\Collection\Arr;
+use Hyperf\Context\ApplicationContext;
 use Vartruexuan\HyperfExcel\Data\Import\ImportRowCallbackParam;
 use Vartruexuan\HyperfExcel\Data\Import\Sheet;
 use Vartruexuan\HyperfExcel\Data\Import\Column;
+use Vartruexuan\HyperfExcel\Progress\ProgressInterface;
 
 class DemoImportConfig extends AbstractImportConfig
 {
@@ -22,7 +24,7 @@ class DemoImportConfig extends AbstractImportConfig
         $this->setSheets([
             new Sheet([
                 'name' => 'sheet1',
-                'headerIndex' => 1,
+                'headerIndex' => 2, // 列头在第二行
                 'isSetHeader' => true,
                 'columns' => [
                     new Column([
@@ -74,6 +76,11 @@ class DemoImportConfig extends AbstractImportConfig
 
                 // 这里可以调用服务类保存数据
                 // make(SomeService::class)->saveData($param->row);
+
+                // 此处模拟演示输出信息
+                $progress = ApplicationContext::getContainer()->get(ProgressInterface::class);
+                $progress->pushMessage($param->config->token, sprintf("第%s行,数据:%s", $param->rowIndex + 2, json_encode($param->row, JSON_UNESCAPED_UNICODE)));
+
             }
         } catch (\Throwable $throwable) {
             throw new BusinessException(500, '第' . ($param->rowIndex + 2) . '行: ' . $throwable->getMessage());

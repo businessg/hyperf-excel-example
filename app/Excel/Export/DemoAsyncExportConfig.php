@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Excel\Export;
 
 use App\Excel\Export\Base\AbstractExportConfig;
+use Hyperf\Context\ApplicationContext;
 use Vartruexuan\HyperfExcel\Data\Export\Column;
 use Vartruexuan\HyperfExcel\Data\Export\ExportCallbackParam;
 use Vartruexuan\HyperfExcel\Data\Export\Sheet;
+use Vartruexuan\HyperfExcel\Progress\ProgressInterface;
 
 class DemoAsyncExportConfig extends AbstractExportConfig
 {
@@ -77,7 +79,7 @@ class DemoAsyncExportConfig extends AbstractExportConfig
         $pageSize = $exportCallbackParam->pageSize;
         
         // 延迟 600ms，模拟数据查询耗时
-        usleep(600000); // 600000 微秒 = 600 毫秒
+        usleep(100000); // 600000 微秒 = 600 毫秒
         
         // 生成模拟数据
         $data = [];
@@ -94,7 +96,13 @@ class DemoAsyncExportConfig extends AbstractExportConfig
                 'created_at' => date('Y-m-d H:i:s', time() - rand(0, 86400 * 30)),
             ];
         }
-        
+
+        // 此处也可以输出一些信息
+        $progress= ApplicationContext::getContainer()->get(ProgressInterface::class);
+        $progress->pushMessage($exportCallbackParam->config->token,sprintf('当前第%s页,数量:%s',$exportCallbackParam->page,$pageSize));
+
+
         return $data;
     }
+
 }

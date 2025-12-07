@@ -9,6 +9,10 @@ use Vartruexuan\HyperfExcel\Data\Export\Column;
 use Vartruexuan\HyperfExcel\Data\Export\Sheet;
 use Vartruexuan\HyperfExcel\Data\Export\Style;
 
+/**
+ * 动态导入模板
+ *  1.有些业务场景可能会在页码二中导出些基础数据
+ */
 class DemoImportTemplateExportConfig extends AbstractExportConfig
 {
     public string $serviceName = 'Demo数据导入模板';
@@ -21,7 +25,7 @@ class DemoImportTemplateExportConfig extends AbstractExportConfig
     {
         $this->setSheets([
             new Sheet([
-                'name' => '导入模板',
+                'name' => 'sheet1',
                 'columns' => [
                     new Column([
                         'title' => implode("\n", [

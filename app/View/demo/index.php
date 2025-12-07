@@ -107,20 +107,38 @@
         .modal-content {
             background: white;
             border-radius: 8px;
-            padding: 24px;
+            padding: 0;
             width: 90%;
             max-width: 600px;
-            height: 80vh;
+            max-height: 90vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 24px 24px 16px 24px;
         }
 
         .modal-body {
             flex: 1;
             overflow-y: auto;
             overflow-x: hidden;
-            padding-right: 8px;
+            padding: 0 24px;
+            padding-right: 16px;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-footer {
+            flex-shrink: 0;
+            padding: 16px 24px 24px 24px;
+            border-top: 1px solid #e8e8e8;
+            text-align: center;
+            margin-top: 0;
+            min-height: 60px;
+            box-sizing: border-box;
         }
 
         .modal-body::-webkit-scrollbar {
@@ -145,7 +163,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 0;
             padding-bottom: 16px;
             border-bottom: 1px solid #e8e8e8;
             flex-shrink: 0;
@@ -170,7 +188,11 @@
         }
 
         .progress-container {
-            margin: 20px 0;
+            margin: 0 0 16px 0;
+            height: 40px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
         }
 
         .progress-bar {
@@ -179,6 +201,7 @@
             background: #f0f0f0;
             border-radius: 4px;
             overflow: hidden;
+            margin-bottom: 8px;
         }
 
         .progress-fill {
@@ -189,24 +212,27 @@
         }
 
         .progress-text {
-            margin-top: 8px;
+            margin: 0;
             font-size: 14px;
             color: #666;
         }
 
         .progress-info {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 12px;
-            margin-bottom: 16px;
-            padding: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 8px;
+            margin: 0 0 16px 0;
+            padding: 8px;
             background: #fafafa;
             border-radius: 4px;
+            min-height: 55px;
+            flex-shrink: 0;
         }
 
         .progress-info-item {
             display: flex;
             flex-direction: column;
+            height: 55px;
         }
 
         .progress-info-label {
@@ -233,13 +259,14 @@
         .status-6 { color: #52c41a; }
 
         .message-container {
-            margin-top: 16px;
-            max-height: 200px;
+            margin: 0;
+            height: 180px;
             overflow-y: auto;
             border: 1px solid #e8e8e8;
             border-radius: 4px;
             padding: 12px;
             background: #fafafa;
+            flex-shrink: 0;
         }
 
         .message-item {
@@ -256,30 +283,119 @@
             color: #52c41a;
         }
 
-        .download-template {
+        .action-buttons {
+            display: flex;
+            gap: 12px;
             margin-bottom: 16px;
+            flex-shrink: 0;
+        }
+
+        .download-template {
+            flex: 1;
+        }
+
+        .start-import-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 10;
+        }
+
+        .download-template-link {
+            color: #1890ff;
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+            transition: color 0.3s;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .download-template-link:hover {
+            color: #40a9ff;
+            text-decoration: underline;
+        }
+
+        .download-template-link:active {
+            color: #096dd9;
         }
 
         .file-input-wrapper {
-            margin: 16px 0;
+            position: relative;
+            display: inline-block;
+            width: 100%;
+            border: 2px dashed #d9d9d9;
+            border-radius: 4px;
+            padding: 20px;
+            text-align: center;
+            background: #fafafa;
+            transition: all 0.3s;
+            cursor: pointer;
+            margin: 0 0 16px 0;
+            flex-shrink: 0;
+        }
+
+        .file-input-wrapper:hover {
+            border-color: #1890ff;
+            background: #f0f7ff;
+        }
+
+        .file-input-wrapper.drag-over {
+            border-color: #1890ff;
+            background: #e6f7ff;
         }
 
         .file-input {
-            width: 100%;
+            position: absolute;
+            width: 0.1px;
+            height: 0.1px;
+            opacity: 0;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .file-input-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .file-input-icon {
+            font-size: 32px;
+            color: #d9d9d9;
+            margin-bottom: 8px;
+            line-height: 1;
+        }
+
+        .file-input-wrapper:hover .file-input-icon,
+        .file-input-wrapper.drag-over .file-input-icon {
+            color: #1890ff;
+        }
+
+        .file-input-text {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 2px;
+        }
+
+        .file-input-hint {
+            font-size: 11px;
+            color: #999;
+        }
+
+        .file-name {
+            margin-top: 12px;
+            font-size: 13px;
+            color: #1890ff;
+            word-break: break-all;
             padding: 8px;
-            border: 1px solid #d9d9d9;
+            background: #f0f7ff;
             border-radius: 4px;
         }
 
-        .imported-data {
-            margin-top: 16px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .imported-data table {
-            font-size: 13px;
-        }
     </style>
 </head>
 <body>
@@ -330,7 +446,11 @@
             </div>
             <div class="modal-body">
                 <div class="progress-container">
-                    <div class="progress-info" id="exportProgressInfo" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="exportProgressFill"></div>
+                    </div>
+                    <div class="progress-text" id="exportProgressText">准备中...</div>
+                    <div class="progress-info" id="exportProgressInfo">
                         <div class="progress-info-item">
                             <div class="progress-info-label">总数</div>
                             <div class="progress-info-value" id="exportTotal">0</div>
@@ -352,15 +472,11 @@
                             <div class="progress-info-value status" id="exportStatus">待处理</div>
                         </div>
                     </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="exportProgressFill"></div>
-                    </div>
-                    <div class="progress-text" id="exportProgressText">准备中...</div>
                 </div>
                 <div class="message-container" id="exportMessages"></div>
-                <div id="exportDownloadArea" style="display: none; margin-top: 16px; text-align: center;">
-                    <button class="btn btn-primary" id="exportDownloadBtn" onclick="downloadExportFile()">下载文件</button>
-                </div>
+            </div>
+            <div class="modal-footer" id="exportDownloadArea" style="visibility: hidden;">
+                <button class="btn btn-primary" id="exportDownloadBtn" onclick="downloadExportFile()">下载文件</button>
             </div>
         </div>
     </div>
@@ -373,57 +489,55 @@
                 <button class="close" onclick="closeImportModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="download-template">
-                    <button class="btn btn-primary" onclick="downloadTemplate()">下载模板</button>
-                </div>
-                <div class="file-input-wrapper">
-                    <input type="file" id="importFile" class="file-input" accept=".xlsx,.xls">
-                </div>
-                <div style="margin-top: 16px;">
-                    <button class="btn btn-success" onclick="startImport()">开始导入</button>
+                <div class="action-buttons">
+                    <div class="download-template">
+                        <a href="javascript:void(0)" class="download-template-link" onclick="downloadTemplate()">下载模板</a>
+                    </div>
                 </div>
                 <div class="progress-container">
-                    <div class="progress-info" id="importProgressInfo" style="display: none;">
-                        <div class="progress-info-item">
-                            <div class="progress-info-label">总数</div>
-                            <div class="progress-info-value" id="importTotal">-</div>
-                        </div>
-                        <div class="progress-info-item">
-                            <div class="progress-info-label">进度</div>
-                            <div class="progress-info-value" id="importProgress">0</div>
-                        </div>
-                        <div class="progress-info-item">
-                            <div class="progress-info-label">成功数</div>
-                            <div class="progress-info-value" id="importSuccess">0</div>
-                        </div>
-                        <div class="progress-info-item">
-                            <div class="progress-info-label">失败数</div>
-                            <div class="progress-info-value" id="importFail">0</div>
-                        </div>
-                        <div class="progress-info-item">
-                            <div class="progress-info-label">状态</div>
-                            <div class="progress-info-value status" id="importStatus">待处理</div>
-                        </div>
-                    </div>
                     <div class="progress-bar">
                         <div class="progress-fill" id="importProgressFill"></div>
                     </div>
                     <div class="progress-text" id="importProgressText">等待上传...</div>
                 </div>
-                <div class="message-container" id="importMessages"></div>
-                <div class="imported-data" id="importedData" style="display: none;">
-                    <h3 style="margin-bottom: 12px; font-size: 16px;">导入的数据：</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>行号</th>
-                                <th>姓名</th>
-                                <th>邮箱</th>
-                            </tr>
-                        </thead>
-                        <tbody id="importedDataBody"></tbody>
-                    </table>
+                <div class="progress-info" id="importProgressInfo">
+                    <div class="progress-info-item">
+                        <div class="progress-info-label">总数</div>
+                        <div class="progress-info-value" id="importTotal">0</div>
+                    </div>
+                    <div class="progress-info-item">
+                        <div class="progress-info-label">进度</div>
+                        <div class="progress-info-value" id="importProgress">0</div>
+                    </div>
+                    <div class="progress-info-item">
+                        <div class="progress-info-label">成功数</div>
+                        <div class="progress-info-value" id="importSuccess">0</div>
+                    </div>
+                    <div class="progress-info-item">
+                        <div class="progress-info-label">失败数</div>
+                        <div class="progress-info-value" id="importFail">0</div>
+                    </div>
+                    <div class="progress-info-item">
+                        <div class="progress-info-label">状态</div>
+                        <div class="progress-info-value status" id="importStatus">待处理</div>
+                    </div>
                 </div>
+                <div class="file-input-wrapper" id="fileInputWrapper" 
+                     ondrop="handleFileDrop(event)" 
+                     ondragover="handleDragOver(event)" 
+                     ondragleave="handleDragLeave(event)">
+                    <div class="start-import-btn">
+                        <button class="btn btn-success" onclick="startImport()">开始导入</button>
+                    </div>
+                    <input type="file" id="importFile" class="file-input" accept=".xlsx,.xls" onchange="handleFileSelect(this)">
+                    <label for="importFile" class="file-input-label">
+                        <span class="file-input-icon">📁</span>
+                        <span class="file-input-text">点击选择文件或拖拽文件到此处</span>
+                        <span class="file-input-hint">支持 .xlsx, .xls 格式</span>
+                    </label>
+                    <div class="file-name" id="importFileName"></div>
+                </div>
+                <div class="message-container" id="importMessages"></div>
             </div>
         </div>
     </div>
@@ -696,7 +810,6 @@
         function updateExportProgressInfo(info) {
             const progressInfoEl = document.getElementById('exportProgressInfo');
             if (progressInfoEl) {
-                progressInfoEl.style.display = 'grid';
                 document.getElementById('exportTotal').textContent = info.total || 0;
                 document.getElementById('exportProgress').textContent = info.progress || 0;
                 document.getElementById('exportSuccess').textContent = info.success || 0;
@@ -715,12 +828,15 @@
 
         function resetExportProgress() {
             updateExportProgress(0, '准备中...');
-            const progressInfoEl = document.getElementById('exportProgressInfo');
-            if (progressInfoEl) {
-                progressInfoEl.style.display = 'none';
-            }
+            // 重置进度信息为初始值
+            document.getElementById('exportTotal').textContent = '0';
+            document.getElementById('exportProgress').textContent = '0';
+            document.getElementById('exportSuccess').textContent = '0';
+            document.getElementById('exportFail').textContent = '0';
+            document.getElementById('exportStatus').textContent = '待处理';
+            document.getElementById('exportStatus').className = 'progress-info-value status status-1';
             document.getElementById('exportMessages').innerHTML = '';
-            document.getElementById('exportDownloadArea').style.display = 'none';
+            document.getElementById('exportDownloadArea').style.visibility = 'hidden';
             exportToken = null;
             exportDownloadUrl = null;
         }
@@ -729,7 +845,7 @@
         function showExportDownloadButton() {
             const downloadArea = document.getElementById('exportDownloadArea');
             if (downloadArea && exportDownloadUrl) {
-                downloadArea.style.display = 'block';
+                downloadArea.style.visibility = 'visible';
             }
         }
 
@@ -770,6 +886,55 @@
             }
             resetImportProgress();
             document.getElementById('importFile').value = '';
+        }
+
+        function handleFileSelect(input) {
+            const fileNameEl = document.getElementById('importFileName');
+            if (input.files && input.files[0]) {
+                fileNameEl.textContent = '已选择: ' + input.files[0].name;
+            } else {
+                fileNameEl.textContent = '';
+            }
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const wrapper = document.getElementById('fileInputWrapper');
+            wrapper.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const wrapper = document.getElementById('fileInputWrapper');
+            wrapper.classList.remove('drag-over');
+        }
+
+        function handleFileDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const wrapper = document.getElementById('fileInputWrapper');
+            wrapper.classList.remove('drag-over');
+            
+            const files = e.dataTransfer.files;
+            if (files && files.length > 0) {
+                const file = files[0];
+                // 检查文件类型
+                const validTypes = ['.xlsx', '.xls'];
+                const fileName = file.name.toLowerCase();
+                const isValid = validTypes.some(type => fileName.endsWith(type));
+                
+                if (isValid) {
+                    const fileInput = document.getElementById('importFile');
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    fileInput.files = dataTransfer.files;
+                    handleFileSelect(fileInput);
+                } else {
+                    alert('请选择 .xlsx 或 .xls 格式的文件');
+                }
+            }
         }
 
         // 下载模板
@@ -965,7 +1130,6 @@
                         if (status === 6) {
                             // 完成状态
                             addImportMessage('导入完成！', 'success');
-                            showImportedData();
                             loadData();
                         } else if (status === 4) {
                             // 处理失败
@@ -1015,9 +1179,8 @@
         function updateImportProgressInfo(info) {
             const progressInfoEl = document.getElementById('importProgressInfo');
             if (progressInfoEl) {
-                progressInfoEl.style.display = 'grid';
-                // 总数：如果没有总数则显示 "-"
-                document.getElementById('importTotal').textContent = info.total > 0 ? info.total : '-';
+                // 总数：如果没有总数则显示 "0"
+                document.getElementById('importTotal').textContent = info.total > 0 ? info.total : '0';
                 document.getElementById('importProgress').textContent = info.progress || 0;
                 document.getElementById('importSuccess').textContent = info.success || 0;
                 document.getElementById('importFail').textContent = info.fail || 0;
@@ -1035,13 +1198,15 @@
 
         function resetImportProgress() {
             updateImportProgress(0, '等待上传...');
-            const progressInfoEl = document.getElementById('importProgressInfo');
-            if (progressInfoEl) {
-                progressInfoEl.style.display = 'none';
-            }
+            // 重置进度信息为初始值
+            document.getElementById('importTotal').textContent = '0';
+            document.getElementById('importProgress').textContent = '0';
+            document.getElementById('importSuccess').textContent = '0';
+            document.getElementById('importFail').textContent = '0';
+            document.getElementById('importStatus').textContent = '待处理';
+            document.getElementById('importStatus').className = 'progress-info-value status status-1';
             document.getElementById('importMessages').innerHTML = '';
-            document.getElementById('importedData').style.display = 'none';
-            document.getElementById('importedDataBody').innerHTML = '';
+            document.getElementById('importFileName').textContent = '';
             importToken = null;
         }
 
@@ -1054,19 +1219,6 @@
             container.scrollTop = container.scrollHeight;
         }
 
-        function showImportedData() {
-            // 这里应该从服务器获取导入的数据
-            // 为了演示，我们显示一些提示信息
-            const tbody = document.getElementById('importedDataBody');
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="3" style="text-align: center; padding: 20px; color: #666;">
-                        导入数据已处理完成，请查看上方数据列表查看最新数据
-                    </td>
-                </tr>
-            `;
-            document.getElementById('importedData').style.display = 'block';
-        }
     </script>
 </body>
 </html>
