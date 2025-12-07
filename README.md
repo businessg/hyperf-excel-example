@@ -1,6 +1,6 @@
 # Hyperf Excel 使用示例
 
-这是一个基于 [vartruexuan/hyperf-excel](https://github.com/vartruexuan/hyperf-excel) 包的完整使用示例项目，演示了如何在 Hyperf 框架中使用 Excel 导入导出功能。
+这是一个基于 [vartruexuan/hyperf-excel](https://github.com/businessg/hyperf-excel) 包的完整使用示例项目，演示了如何在 Hyperf 框架中使用 Excel 导入导出功能。
 
 ## 📦 包安装
 
