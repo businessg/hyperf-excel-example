@@ -7,14 +7,22 @@ return [
     'drivers' => [
         'xlswriter' => [
             'driver' => \Vartruexuan\HyperfExcel\Driver\XlsWriterDriver::class,
+            // filesystem 配置
+            'filesystem' => [
+                'storage' => 'local', // 默认本地
+            ],
+            // 导出配置
+            'export' => [
+                'rootDir' => 'export', // 导出根目录
+            ],
         ]
     ],
     'options' => [
-        // filesystem 配置
+        // filesystem 配置（兼容旧配置）
         'filesystem' => [
             'storage' => 'local', // 默认本地
         ],
-        // 导出配置
+        // 导出配置（兼容旧配置）
         'export' => [
             'rootDir' => 'export', // 导出根目录
         ],

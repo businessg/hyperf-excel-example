@@ -21,11 +21,18 @@ use function Hyperf\Support\env;
 
 return [
     'default' => 'local',
+    // 文件下载域名配置
+    'download' => [
+        // 下载路径域名，为空则使用当前域名
+        'domain' => env('FILE_DOWNLOAD_DOMAIN', ''),
+        // 下载路径前缀，默认为 /upload
+        'path_prefix' => env('FILE_DOWNLOAD_PATH_PREFIX', '/upload'),
+    ],
     'storage' => [
         // 本地
         'local' => [
             'driver' => LocalAdapterFactory::class,
-            'root' => __DIR__ . '/../../runtime',
+            'root' => __DIR__ . '/../../public/upload',
         ],
         'ftp' => [
             'driver' => FtpAdapterFactory::class,
