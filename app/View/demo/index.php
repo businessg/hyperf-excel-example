@@ -13,78 +13,163 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f5f5f5;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             padding: 20px;
+            min-height: 100vh;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
             background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            padding: 32px;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         h1 {
-            margin-bottom: 24px;
-            color: #333;
-            font-size: 24px;
+            margin-bottom: 28px;
+            color: #1a1a1a;
+            font-size: 28px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        h1::before {
+            content: '📊';
+            font-size: 32px;
         }
 
         .toolbar {
             display: flex;
-            gap: 12px;
-            margin-bottom: 24px;
+            gap: 16px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
         }
 
         .btn {
-            padding: 8px 16px;
+            padding: 10px 24px;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
         }
 
         .btn-primary {
-            background: #1890ff;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
 
         .btn-primary:hover {
-            background: #40a9ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
         }
 
         .btn-success {
-            background: #52c41a;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
             color: white;
         }
 
         .btn-success:hover {
-            background: #73d13d;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(17, 153, 142, 0.4);
+        }
+
+        .btn-success:active {
+            transform: translateY(0);
         }
 
         table {
             width: 100%;
-            border-collapse: collapse;
-            margin-top: 16px;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 20px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
         th, td {
-            padding: 12px;
+            padding: 16px;
             text-align: left;
-            border-bottom: 1px solid #e8e8e8;
+            border-bottom: 1px solid #f0f0f0;
         }
 
         th {
-            background: #fafafa;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             font-weight: 600;
-            color: #333;
+            color: white;
+            text-transform: uppercase;
+            font-size: 13px;
+            letter-spacing: 0.5px;
         }
 
-        tr:hover {
-            background: #fafafa;
+        th:first-child {
+            border-top-left-radius: 8px;
+        }
+
+        th:last-child {
+            border-top-right-radius: 8px;
+        }
+
+        tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background: #f8f9ff;
+            transform: scale(1.01);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        td {
+            color: #555;
         }
 
         .modal {
@@ -94,10 +179,12 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
             z-index: 1000;
             align-items: center;
             justify-content: center;
+            animation: fadeIn 0.2s ease;
         }
 
         .modal.active {
@@ -106,14 +193,27 @@
 
         .modal-content {
             background: white;
-            border-radius: 8px;
+            border-radius: 16px;
             padding: 0;
             width: 90%;
-            max-width: 600px;
-            max-height: 90vh;
+            max-width: 700px;
+            max-height: 95vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
 
         .modal-header {
@@ -121,41 +221,42 @@
         }
 
         .modal-body {
-            flex: 1;
-            overflow-y: auto;
+            flex: 1 1 auto;
+            overflow: visible;
             overflow-x: hidden;
-            padding: 0 24px;
-            padding-right: 16px;
+            padding: 16px 20px;
             min-height: 0;
             display: flex;
             flex-direction: column;
+            background: #fafbfc;
         }
 
         .modal-footer {
             flex-shrink: 0;
-            padding: 16px 24px 24px 24px;
-            border-top: 1px solid #e8e8e8;
+            padding: 12px 20px;
+            border-top: 2px solid #f0f0f0;
             text-align: center;
             margin-top: 0;
-            min-height: 60px;
+            min-height: 50px;
             box-sizing: border-box;
+            background: white;
         }
 
-        .modal-body::-webkit-scrollbar {
+        .message-container::-webkit-scrollbar {
             width: 6px;
         }
 
-        .modal-body::-webkit-scrollbar-track {
+        .message-container::-webkit-scrollbar-track {
             background: #f1f1f1;
             border-radius: 3px;
         }
 
-        .modal-body::-webkit-scrollbar-thumb {
+        .message-container::-webkit-scrollbar-thumb {
             background: #888;
             border-radius: 3px;
         }
 
-        .modal-body::-webkit-scrollbar-thumb:hover {
+        .message-container::-webkit-scrollbar-thumb:hover {
             background: #555;
         }
 
@@ -164,160 +265,295 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 0;
-            padding-bottom: 16px;
-            border-bottom: 1px solid #e8e8e8;
+            padding: 16px 24px 12px 24px;
+            border-bottom: 2px solid #f0f0f0;
             flex-shrink: 0;
+            background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
         }
 
         .modal-title {
             font-size: 18px;
-            font-weight: 600;
-            color: #333;
+            font-weight: 700;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .close {
-            background: none;
+            background: #f5f5f5;
             border: none;
-            font-size: 24px;
+            font-size: 20px;
             cursor: pointer;
-            color: #999;
+            color: #666;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            line-height: 1;
         }
 
         .close:hover {
+            background: #e8e8e8;
             color: #333;
+            transform: rotate(90deg);
         }
 
         .progress-container {
-            margin: 0 0 16px 0;
-            height: 40px;
+            margin: 0 0 12px 0;
+            min-height: 40px;
             flex-shrink: 0;
             display: flex;
             flex-direction: column;
+            background: white;
+            padding: 12px 16px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            overflow: visible;
         }
 
         .progress-bar {
             width: 100%;
-            height: 8px;
-            background: #f0f0f0;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 8px;
+            height: 20px;
+            background: #e8e8e8;
+            border-radius: 10px;
+            overflow: visible;
+            margin-bottom: 0;
+            display: block;
+            position: relative;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .progress-fill {
             height: 100%;
-            background: #1890ff;
-            transition: width 0.3s;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             width: 0%;
+            display: block;
+            min-width: 0;
+            border-radius: 10px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+            z-index: 1;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
         }
 
         .progress-text {
-            margin: 0;
-            font-size: 14px;
-            color: #666;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 10px;
+            color: #1a1a1a;
+            display: block;
+            line-height: 1;
+            font-weight: 700;
+            z-index: 2;
+            white-space: nowrap;
+            text-transform: lowercase;
+            pointer-events: none;
+            text-shadow: 
+                0 0 4px rgba(255, 255, 255, 1),
+                0 0 8px rgba(255, 255, 255, 0.9),
+                0 1px 2px rgba(0, 0, 0, 0.1);
+            letter-spacing: 0.3px;
         }
 
         .progress-info {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            display: grid !important;
+            grid-template-columns: repeat(5, 1fr);
             gap: 8px;
-            margin: 0 0 16px 0;
-            padding: 8px;
-            background: #fafafa;
-            border-radius: 4px;
+            margin: 10px 0 0 0;
+            padding: 12px;
+            background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+            border-radius: 10px;
             min-height: 55px;
             flex-shrink: 0;
+            visibility: visible;
+            opacity: 1;
+            border: 1px solid #e8e8e8;
+            overflow: visible;
+        }
+
+        .progress-bar-wrapper {
+            grid-column: 1 / -1;
+            margin-bottom: 8px;
         }
 
         .progress-info-item {
-            display: flex;
+            display: flex !important;
             flex-direction: column;
-            height: 55px;
+            justify-content: center;
+            min-height: 50px;
+            padding: 6px;
+            background: white;
+            border-radius: 8px;
+            visibility: visible;
+            opacity: 1;
+            transition: all 0.2s ease;
+            border: 1px solid #f0f0f0;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .progress-info-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border-color: #667eea;
         }
 
         .progress-info-label {
-            font-size: 12px;
-            color: #999;
+            font-size: 10px;
+            color: #888;
             margin-bottom: 4px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .progress-info-value {
             font-size: 16px;
-            font-weight: 600;
-            color: #333;
+            font-weight: 700;
+            color: #1a1a1a;
+            display: block;
+            visibility: visible;
+            opacity: 1;
+            line-height: 1.2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .progress-info-value.status {
-            font-size: 14px;
+            font-size: 13px;
+            font-weight: 600;
         }
 
         .status-1 { color: #999; }
-        .status-2 { color: #1890ff; }
-        .status-3 { color: #52c41a; }
-        .status-4 { color: #ff4d4f; }
-        .status-5 { color: #faad14; }
-        .status-6 { color: #52c41a; }
+        .status-2 { color: #667eea; }
+        .status-3 { color: #38ef7d; }
+        .status-4 { color: #ff6b6b; }
+        .status-5 { color: #ffd93d; }
+        .status-6 { color: #38ef7d; }
 
         .message-container {
             margin: 0;
-            height: 180px;
+            max-height: 180px;
+            min-height: 80px;
             overflow-y: auto;
-            border: 1px solid #e8e8e8;
-            border-radius: 4px;
+            overflow-x: hidden;
+            border: 2px solid #e8e8e8;
+            border-radius: 10px;
             padding: 12px;
-            background: #fafafa;
+            background: white;
             flex-shrink: 0;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
         .message-item {
-            padding: 4px 0;
-            font-size: 13px;
+            padding: 6px 10px;
+            font-size: 12px;
             color: #666;
+            margin-bottom: 4px;
+            border-radius: 6px;
+            background: #f8f9ff;
+            border-left: 3px solid #667eea;
+            transition: all 0.2s ease;
+        }
+
+        .message-item:hover {
+            background: #f0f2ff;
+            transform: translateX(4px);
         }
 
         .message-item.error {
-            color: #ff4d4f;
+            color: #ff6b6b;
+            background: #fff5f5;
+            border-left-color: #ff6b6b;
+        }
+
+        .message-item.error:hover {
+            background: #ffe8e8;
         }
 
         .message-item.success {
-            color: #52c41a;
+            color: #38ef7d;
+            background: #f0fff4;
+            border-left-color: #38ef7d;
+        }
+
+        .message-item.success:hover {
+            background: #e8fef0;
         }
 
         .action-buttons {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 16px;
-            flex-shrink: 0;
-        }
-
-        .download-template {
-            flex: 1;
-        }
-
-        .start-import-btn {
             position: absolute;
-            top: 10px;
-            left: 10px;
+            top: 12px;
+            left: 12px;
+            display: flex;
+            gap: 10px;
             z-index: 10;
-        }
-
-        .download-template-link {
-            color: #1890ff;
-            text-decoration: none;
-            font-size: 14px;
-            cursor: pointer;
-            transition: color 0.3s;
-            display: inline-flex;
             align-items: center;
         }
 
+        .action-buttons .download-template-link {
+            flex-shrink: 0;
+        }
+
+        .action-buttons .btn {
+            flex-shrink: 0;
+            padding: 6px 16px;
+            font-size: 13px;
+        }
+
+        .download-template-link {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+            border: 1px solid #e0e7ff;
+        }
+
         .download-template-link:hover {
-            color: #40a9ff;
-            text-decoration: underline;
+            color: #764ba2;
+            background: linear-gradient(135deg, #f0f2ff 0%, #f8f9ff 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
         }
 
         .download-template-link:active {
-            color: #096dd9;
+            transform: translateY(0);
         }
 
         .file-input-wrapper {
@@ -325,24 +561,29 @@
             display: inline-block;
             width: 100%;
             border: 2px dashed #d9d9d9;
-            border-radius: 4px;
-            padding: 20px;
+            border-radius: 12px;
+            padding: 50px 16px 24px 16px;
             text-align: center;
-            background: #fafafa;
-            transition: all 0.3s;
+            background: white;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
-            margin: 0 0 16px 0;
+            margin: 0 0 12px 0;
             flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
         .file-input-wrapper:hover {
-            border-color: #1890ff;
-            background: #f0f7ff;
+            border-color: #667eea;
+            background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
         }
 
         .file-input-wrapper.drag-over {
-            border-color: #1890ff;
-            background: #e6f7ff;
+            border-color: #667eea;
+            background: linear-gradient(135deg, #e6f0ff 0%, #f0f7ff 100%);
+            transform: scale(1.02);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
         }
 
         .file-input {
@@ -364,15 +605,17 @@
         }
 
         .file-input-icon {
-            font-size: 32px;
+            font-size: 40px;
             color: #d9d9d9;
             margin-bottom: 8px;
             line-height: 1;
+            transition: all 0.3s ease;
         }
 
         .file-input-wrapper:hover .file-input-icon,
         .file-input-wrapper.drag-over .file-input-icon {
-            color: #1890ff;
+            color: #667eea;
+            transform: scale(1.1);
         }
 
         .file-input-text {
@@ -389,11 +632,118 @@
         .file-name {
             margin-top: 12px;
             font-size: 13px;
-            color: #1890ff;
+            color: #667eea;
             word-break: break-all;
-            padding: 8px;
-            background: #f0f7ff;
-            border-radius: 4px;
+            padding: 8px 12px;
+            background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%);
+            border-radius: 8px;
+            border: 1px solid #e0e7ff;
+            font-weight: 500;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 20px;
+                border-radius: 8px;
+            }
+
+            h1 {
+                font-size: 22px;
+                margin-bottom: 20px;
+            }
+
+            .toolbar {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .btn {
+                width: 100%;
+                padding: 12px 20px;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            th, td {
+                padding: 10px 8px;
+            }
+
+            .modal-content {
+                width: 95%;
+                max-width: none;
+                border-radius: 12px;
+            }
+
+            .modal-header {
+                padding: 20px;
+            }
+
+            .modal-body {
+                padding: 20px;
+            }
+
+            .modal-footer {
+                padding: 16px 20px;
+            }
+
+            .progress-info {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 8px;
+                padding: 12px;
+            }
+
+            .progress-bar-wrapper {
+                grid-column: 1 / -1;
+            }
+
+            .progress-info-item {
+                min-height: 50px;
+                padding: 6px;
+            }
+
+            .progress-info-value {
+                font-size: 16px;
+            }
+
+            .progress-info-label {
+                font-size: 10px;
+            }
+
+            .file-input-wrapper {
+                padding: 24px 16px;
+            }
+
+            .file-input-icon {
+                font-size: 36px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .progress-info {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 6px;
+                padding: 10px;
+            }
+
+            .progress-info-item {
+                min-height: 45px;
+                padding: 4px;
+            }
+
+            .progress-info-value {
+                font-size: 14px;
+            }
+
+            .progress-info-label {
+                font-size: 9px;
+            }
         }
 
     </style>
@@ -445,32 +795,32 @@
                 <button class="close" onclick="closeExportModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="progress-container">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="exportProgressFill"></div>
+                <div class="progress-info" id="exportProgressInfo">
+                    <div class="progress-bar-wrapper">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="exportProgressFill"></div>
+                            <div class="progress-text" id="exportProgressText">准备中...</div>
+                        </div>
                     </div>
-                    <div class="progress-text" id="exportProgressText">准备中...</div>
-                    <div class="progress-info" id="exportProgressInfo">
-                        <div class="progress-info-item">
-                            <div class="progress-info-label">总数</div>
-                            <div class="progress-info-value" id="exportTotal">0</div>
-                        </div>
-                        <div class="progress-info-item">
-                            <div class="progress-info-label">进度</div>
-                            <div class="progress-info-value" id="exportProgress">0</div>
-                        </div>
-                        <div class="progress-info-item">
-                            <div class="progress-info-label">成功数</div>
-                            <div class="progress-info-value" id="exportSuccess">0</div>
-                        </div>
-                        <div class="progress-info-item">
-                            <div class="progress-info-label">失败数</div>
-                            <div class="progress-info-value" id="exportFail">0</div>
-                        </div>
-                        <div class="progress-info-item">
-                            <div class="progress-info-label">状态</div>
-                            <div class="progress-info-value status" id="exportStatus">待处理</div>
-                        </div>
+                    <div class="progress-info-item">
+                        <div class="progress-info-label">总数</div>
+                        <div class="progress-info-value" id="exportTotal">0</div>
+                    </div>
+                    <div class="progress-info-item">
+                        <div class="progress-info-label">进度</div>
+                        <div class="progress-info-value" id="exportProgress">0</div>
+                    </div>
+                    <div class="progress-info-item">
+                        <div class="progress-info-label">成功数</div>
+                        <div class="progress-info-value" id="exportSuccess">0</div>
+                    </div>
+                    <div class="progress-info-item">
+                        <div class="progress-info-label">失败数</div>
+                        <div class="progress-info-value" id="exportFail">0</div>
+                    </div>
+                    <div class="progress-info-item">
+                        <div class="progress-info-label">状态</div>
+                        <div class="progress-info-value status" id="exportStatus">待处理</div>
                     </div>
                 </div>
                 <div class="message-container" id="exportMessages"></div>
@@ -489,18 +839,13 @@
                 <button class="close" onclick="closeImportModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="action-buttons">
-                    <div class="download-template">
-                        <a href="javascript:void(0)" class="download-template-link" onclick="downloadTemplate()">下载模板</a>
-                    </div>
-                </div>
-                <div class="progress-container">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="importProgressFill"></div>
-                    </div>
-                    <div class="progress-text" id="importProgressText">等待上传...</div>
-                </div>
                 <div class="progress-info" id="importProgressInfo">
+                    <div class="progress-bar-wrapper">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="importProgressFill"></div>
+                            <div class="progress-text" id="importProgressText">等待上传...</div>
+                        </div>
+                    </div>
                     <div class="progress-info-item">
                         <div class="progress-info-label">总数</div>
                         <div class="progress-info-value" id="importTotal">0</div>
@@ -526,7 +871,8 @@
                      ondrop="handleFileDrop(event)" 
                      ondragover="handleDragOver(event)" 
                      ondragleave="handleDragLeave(event)">
-                    <div class="start-import-btn">
+                    <div class="action-buttons">
+                        <a href="javascript:void(0)" class="download-template-link" onclick="downloadTemplate()">下载模板</a>
                         <button class="btn btn-success" onclick="startImport()">开始导入</button>
                     </div>
                     <input type="file" id="importFile" class="file-input" accept=".xlsx,.xls" onchange="handleFileSelect(this)">
@@ -610,8 +956,35 @@
 
         // 打开导出弹窗
         function openExportModal() {
-            document.getElementById('exportModal').classList.add('active');
-            startExport();
+            const modal = document.getElementById('exportModal');
+            modal.classList.add('active');
+            
+            // 确保弹窗内容可见
+            const modalBody = modal.querySelector('.modal-body');
+            if (modalBody) {
+                modalBody.style.display = 'flex';
+                modalBody.style.visibility = 'visible';
+            }
+            
+            // 立即初始化进度显示，确保用户能看到
+            // 使用 requestAnimationFrame 确保DOM已完全渲染
+            requestAnimationFrame(() => {
+                updateExportProgress(0, '准备中...');
+                updateExportProgressInfo({
+                    total: 0,
+                    progress: 0,
+                    success: 0,
+                    fail: 0,
+                    status: '待处理',
+                    statusClass: 'status-1',
+                    percent: 0
+                });
+                
+                // 再延迟一下再开始导出，确保样式已应用
+                setTimeout(() => {
+                    startExport();
+                }, 50);
+            });
         }
 
         function closeExportModal() {
@@ -712,15 +1085,30 @@
                 const result = await response.json();
                 
                 if (result.code === 0) {
-                    const progress = result.data.progress || {};
-                    const total = progress.total || 0;
-                    const progressCount = progress.progress || 0;
-                    const success = progress.success || 0;
-                    const fail = progress.fail || 0;
-                    const status = progress.status || 1;
+                    // 确保正确获取进度数据，支持多种可能的数据结构
+                    const progress = result.data?.progress || {};
+                    const total = Number(progress.total) || 0;
+                    const progressCount = Number(progress.progress) || 0;
+                    const success = Number(progress.success) || 0;
+                    const fail = Number(progress.fail) || 0;
+                    const status = Number(progress.status) || 1;
+                    
+                    // 调试：打印API返回的完整数据（仅在开发时使用）
+                    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                        console.log('导出进度API返回:', result);
+                        console.log('解析后的进度数据:', { total, progressCount, success, fail, status });
+                    }
                     
                     // 计算百分比
-                    const percent = total > 0 ? Math.round((progressCount / total) * 100) : 0;
+                    let percent = 0;
+                    if (total > 0) {
+                        percent = Math.round((progressCount / total) * 100);
+                    } else if (status === 2 || status === 5) {
+                        // 处理中或正在输出时，即使没有总数也显示一个估算进度
+                        percent = progressCount > 0 ? Math.min(Math.round(progressCount / 10), 99) : 10;
+                    } else if (status === 1) {
+                        percent = 5;
+                    }
                     
                     // 状态映射：1待处理、2处理中、3处理完成、4处理失败、5正在输出、6完成
                     const statusMap = {
@@ -733,7 +1121,7 @@
                     };
                     const statusInfo = statusMap[status] || { text: '未知', class: '' };
                     
-                    // 更新进度信息显示
+                    // 更新进度信息显示（确保每次都更新，即使值为0）
                     updateExportProgressInfo({
                         total,
                         progress: progressCount,
@@ -745,7 +1133,7 @@
                     });
                     
                     // 更新进度条
-                    updateExportProgress(percent, `${statusInfo.text} (${percent}%)`);
+                    updateExportProgress(percent, `${statusInfo.text}${total > 0 ? ' (' + percent + '%)' : ''}`);
                     
                     // 根据状态终止进度轮询（状态4或6）
                     if (status === 4 || status === 6) {
@@ -754,7 +1142,7 @@
                         
                         if (status === 6) {
                             // 完成状态，从 result.data.data.response 获取文件地址
-                            const fileResponse = result.data.data?.response || '';
+                            const fileResponse = result.data?.data?.response || '';
                             if (fileResponse) {
                                 addExportMessage('导出成功！', 'success');
                                 exportDownloadUrl = getExportDownloadUrl(fileResponse);
@@ -809,34 +1197,118 @@
         // 更新导出进度信息
         function updateExportProgressInfo(info) {
             const progressInfoEl = document.getElementById('exportProgressInfo');
-            if (progressInfoEl) {
-                document.getElementById('exportTotal').textContent = info.total || 0;
-                document.getElementById('exportProgress').textContent = info.progress || 0;
-                document.getElementById('exportSuccess').textContent = info.success || 0;
-                document.getElementById('exportFail').textContent = info.fail || 0;
-                const statusEl = document.getElementById('exportStatus');
+            if (!progressInfoEl) {
+                console.warn('导出进度信息容器不存在');
+                return;
+            }
+            
+            // 强制显示进度信息容器
+            progressInfoEl.style.display = 'grid';
+            progressInfoEl.style.visibility = 'visible';
+            progressInfoEl.style.opacity = '1';
+            
+            // 确保所有值都是数字类型，并正确显示
+            const totalEl = document.getElementById('exportTotal');
+            const progressEl = document.getElementById('exportProgress');
+            const successEl = document.getElementById('exportSuccess');
+            const failEl = document.getElementById('exportFail');
+            const statusEl = document.getElementById('exportStatus');
+            
+            // 强制更新所有元素，确保显示
+            if (totalEl) {
+                totalEl.textContent = String(info.total ?? 0);
+                totalEl.style.display = 'block';
+                totalEl.style.visibility = 'visible';
+                totalEl.style.opacity = '1';
+            }
+            
+            if (progressEl) {
+                progressEl.textContent = String(info.progress ?? 0);
+                progressEl.style.display = 'block';
+                progressEl.style.visibility = 'visible';
+                progressEl.style.opacity = '1';
+            }
+            
+            if (successEl) {
+                successEl.textContent = String(info.success ?? 0);
+                successEl.style.display = 'block';
+                successEl.style.visibility = 'visible';
+                successEl.style.opacity = '1';
+            }
+            
+            if (failEl) {
+                failEl.textContent = String(info.fail ?? 0);
+                failEl.style.display = 'block';
+                failEl.style.visibility = 'visible';
+                failEl.style.opacity = '1';
+            }
+            
+            if (statusEl) {
                 statusEl.textContent = info.status || '待处理';
                 statusEl.className = 'progress-info-value status ' + (info.statusClass || 'status-1');
+                statusEl.style.display = 'block';
+                statusEl.style.visibility = 'visible';
+                statusEl.style.opacity = '1';
             }
+            
+            // 确保所有进度信息项都可见
+            const progressItems = progressInfoEl.querySelectorAll('.progress-info-item');
+            progressItems.forEach(item => {
+                item.style.display = 'flex';
+                item.style.visibility = 'visible';
+                item.style.opacity = '1';
+            });
         }
 
         // 更新导出进度条
         function updateExportProgress(percent, text) {
-            document.getElementById('exportProgressFill').style.width = percent + '%';
-            document.getElementById('exportProgressText').textContent = text;
+            const progressFillEl = document.getElementById('exportProgressFill');
+            const progressTextEl = document.getElementById('exportProgressText');
+            const progressBarEl = document.getElementById('exportProgressFill')?.parentElement;
+            
+            if (!progressFillEl || !progressTextEl) {
+                console.warn('进度条元素不存在', { progressFillEl, progressTextEl });
+                return;
+            }
+            
+            if (progressBarEl) {
+                progressBarEl.style.display = 'block';
+                progressBarEl.style.visibility = 'visible';
+            }
+            
+            // 确保百分比在0-100之间
+            const safePercent = Math.max(0, Math.min(100, percent));
+            progressFillEl.style.width = safePercent + '%';
+            progressFillEl.style.display = 'block';
+            progressFillEl.style.visibility = 'visible';
+            progressFillEl.style.opacity = '1';
+            
+            // 更新文本，转换为小写
+            const displayText = (text || '准备中...').toLowerCase();
+            progressTextEl.textContent = displayText;
+            progressTextEl.style.display = 'block';
+            progressTextEl.style.visibility = 'visible';
         }
 
         function resetExportProgress() {
             updateExportProgress(0, '准备中...');
-            // 重置进度信息为初始值
-            document.getElementById('exportTotal').textContent = '0';
-            document.getElementById('exportProgress').textContent = '0';
-            document.getElementById('exportSuccess').textContent = '0';
-            document.getElementById('exportFail').textContent = '0';
-            document.getElementById('exportStatus').textContent = '待处理';
-            document.getElementById('exportStatus').className = 'progress-info-value status status-1';
-            document.getElementById('exportMessages').innerHTML = '';
-            document.getElementById('exportDownloadArea').style.visibility = 'hidden';
+            // 重置进度信息为初始值，使用统一的更新函数
+            updateExportProgressInfo({
+                total: 0,
+                progress: 0,
+                success: 0,
+                fail: 0,
+                status: '待处理',
+                statusClass: 'status-1',
+                percent: 0
+            });
+            
+            const messagesEl = document.getElementById('exportMessages');
+            if (messagesEl) messagesEl.innerHTML = '';
+            
+            const downloadArea = document.getElementById('exportDownloadArea');
+            if (downloadArea) downloadArea.style.visibility = 'hidden';
+            
             exportToken = null;
             exportDownloadUrl = null;
         }
@@ -1192,8 +1664,19 @@
 
         // 更新导入进度条
         function updateImportProgress(percent, text) {
-            document.getElementById('importProgressFill').style.width = percent + '%';
-            document.getElementById('importProgressText').textContent = text;
+            const progressFillEl = document.getElementById('importProgressFill');
+            const progressTextEl = document.getElementById('importProgressText');
+            
+            if (!progressFillEl || !progressTextEl) {
+                return;
+            }
+            
+            const safePercent = Math.max(0, Math.min(100, percent));
+            progressFillEl.style.width = safePercent + '%';
+            
+            // 更新文本，转换为小写
+            const displayText = (text || '等待上传...').toLowerCase();
+            progressTextEl.textContent = displayText;
         }
 
         function resetImportProgress() {
