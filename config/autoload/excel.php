@@ -7,22 +7,15 @@ return [
     'drivers' => [
         'xlswriter' => [
             'driver' => \Vartruexuan\HyperfExcel\Driver\XlsWriterDriver::class,
-            // filesystem 配置
-            'filesystem' => [
-                'storage' => 'local', // 默认本地
-            ],
-            // 导出配置
-            'export' => [
-                'rootDir' => 'export', // 导出根目录
-            ],
-        ]
+        ],
+        'spreadsheet' => [
+            'driver' => \Vartruexuan\HyperfExcel\Driver\SpreadSheetDriver::class,
+        ],
     ],
     'options' => [
-        // filesystem 配置（兼容旧配置）
         'filesystem' => [
             'storage' => 'local', // 默认本地
         ],
-        // 导出配置（兼容旧配置）
         'export' => [
             'rootDir' => 'export', // 导出根目录
         ],
@@ -31,7 +24,7 @@ return [
     'logger' => [
         'name' => 'hyperf-excel',
     ],
-    // queue配置
+    // 异步队列配置
     'queue' => [
         'name' => 'default',
     ],
@@ -43,7 +36,7 @@ return [
     ],
     // db日志
     'dbLog' => [
-        'enable' => true,
+        'enable' => false,
         'model' => \Vartruexuan\HyperfExcel\Db\Model\ExcelLog::class,
     ],
     // 清除临时文件

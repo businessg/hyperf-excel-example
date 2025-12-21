@@ -17,6 +17,14 @@ return [
         'demoImportTemplate' => [
             'config' => \App\Excel\Export\DemoImportTemplateExportConfig::class,
         ],
+        // Demo XlsWriter驱动导出（包含所有数据类型）
+        'demoXlsWriterExport' => [
+            'config' => \App\Excel\Export\DemoXlsWriterExportConfig::class,
+        ],
+        // Demo SpreadSheet驱动导出（包含所有数据类型）
+        'demoSpreadSheetExport' => [
+            'config' => \App\Excel\Export\DemoSpreadSheetDriverExportConfig::class,
+        ],
     ],
     // 导入配置
     'import' => [

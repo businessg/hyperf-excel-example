@@ -54,6 +54,129 @@
             font-size: 32px;
         }
 
+        .export-config-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .config-selectors {
+            display: flex;
+            gap: 16px;
+            align-items: flex-end;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .selector-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .selector-group label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .config-select {
+            padding: 8px 16px;
+            border: 2px solid #e8e8e8;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 180px;
+        }
+
+        .config-select:hover {
+            border-color: #667eea;
+        }
+
+        .config-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .code-display-section {
+            background: #1e1e1e;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: #252526;
+            border-bottom: 1px solid #3e3e42;
+        }
+
+        .code-header span {
+            font-size: 14px;
+            font-weight: 600;
+            color: #cccccc;
+        }
+
+        .btn-copy {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+
+        .btn-copy:hover {
+            background: #005a9e;
+        }
+
+        .code-block {
+            margin: 0;
+            padding: 16px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .code-block code {
+            display: block;
+            white-space: pre;
+        }
+
+        .code-block::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .code-block::-webkit-scrollbar-track {
+            background: #252526;
+        }
+
+        .code-block::-webkit-scrollbar-thumb {
+            background: #424242;
+            border-radius: 4px;
+        }
+
+        .code-block::-webkit-scrollbar-thumb:hover {
+            background: #4e4e4e;
+        }
+
         .toolbar {
             display: flex;
             gap: 16px;
@@ -752,39 +875,35 @@
     <div class="container">
         <h1>Excel 导入导出 Demo</h1>
         
-        <div class="toolbar">
-            <button class="btn btn-primary" onclick="openExportModal()">导出数据</button>
-            <button class="btn btn-success" onclick="openImportModal()">导入数据</button>
+        <?php
+        // 代码示例数据（存储在PHP变量中，避免解析错误）
+        $codeExamples = [
+            'xlswriter' => file_get_contents(__DIR__ . '/../../Excel/Export/DemoXlsWriterExportConfig.php'),
+            'spreadsheet' => file_get_contents(__DIR__ . '/../../Excel/Export/DemoSpreadSheetDriverExportConfig.php'),
+        ];
+        ?>
+        
+        <div class="export-config-section">
+            <div class="config-selectors">
+                <div class="selector-group">
+                    <label for="driverSelect">选择驱动：</label>
+                    <select id="driverSelect" class="config-select" onchange="updateCodeDisplay()">
+                        <option value="xlswriter">XlsWriter</option>
+                        <option value="spreadsheet">SpreadSheet</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="startExportWithConfig()">导出数据</button>
+                <button class="btn btn-success" onclick="openImportModal()">导入数据</button>
+            </div>
+            
+            <div class="code-display-section">
+                <div class="code-header">
+                    <span>导出配置代码</span>
+                    <button class="btn-copy" onclick="copyCode()" title="复制代码">📋</button>
+                </div>
+                <pre id="codeDisplay" class="code-block"><code id="codeContent"></code></pre>
+            </div>
         </div>
-
-        <table id="dataTable">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>姓名</th>
-                    <th>邮箱</th>
-                    <th>创建时间</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody">
-                <?php if (!empty($dataList)): ?>
-                    <?php foreach ($dataList as $item): ?>
-                        <tr>
-                            <td><?= htmlspecialchars($item['id']) ?></td>
-                            <td><?= htmlspecialchars($item['name']) ?></td>
-                            <td><?= htmlspecialchars($item['email']) ?></td>
-                            <td><?= htmlspecialchars($item['created_at']) ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <tr>
-                        <td colspan="4" style="text-align: center; padding: 40px; color: #999;">
-                            暂无数据
-                        </td>
-                    </tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
     </div>
 
     <!-- 导出弹窗 -->
@@ -906,6 +1025,128 @@
         let importMessageInterval = null; // 导入消息轮询
         let exportDownloadUrl = null; // 保存导出文件的下载地址
 
+        // 代码示例映射（从PHP变量中获取）
+        const codeExamples = <?php echo json_encode($codeExamples, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
+
+            // 业务ID映射
+            const businessIdMap = {
+                'xlswriter': 'demoXlsWriterExport',
+                'spreadsheet': 'demoSpreadSheetExport'
+            };
+
+            // 更新代码显示
+            function updateCodeDisplay() {
+                const driver = document.getElementById('driverSelect').value;
+                const code = codeExamples[driver] || '';
+                document.getElementById('codeContent').textContent = code;
+            }
+
+            // 根据配置开始导出
+            function startExportWithConfig() {
+                const driver = document.getElementById('driverSelect').value;
+                const businessId = businessIdMap[driver];
+                
+                if (businessId) {
+                    openExportModal(businessId);
+                } else {
+                    alert('未找到对应的导出配置');
+                }
+            }
+
+        // 复制代码
+        function copyCode() {
+            const codeContentEl = document.getElementById('codeContent');
+            if (!codeContentEl) {
+                alert('代码内容不存在');
+                return;
+            }
+            
+            const codeContent = codeContentEl.textContent || codeContentEl.innerText || '';
+            if (!codeContent.trim()) {
+                alert('代码内容为空');
+                return;
+            }
+            
+            const btn = document.querySelector('.btn-copy');
+            const originalText = btn ? btn.textContent : '📋';
+            
+            // 优先使用现代 Clipboard API
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(codeContent).then(() => {
+                    if (btn) {
+                        btn.textContent = '✓ 已复制';
+                        btn.style.background = '#28a745';
+                        setTimeout(() => {
+                            btn.textContent = originalText;
+                            btn.style.background = '#007acc';
+                        }, 2000);
+                    }
+                }).catch(err => {
+                    console.error('复制失败:', err);
+                    // 如果Clipboard API失败，尝试使用传统方法
+                    fallbackCopyTextToClipboard(codeContent, btn, originalText);
+                });
+            } else {
+                // 使用传统方法作为备选
+                fallbackCopyTextToClipboard(codeContent, btn, originalText);
+            }
+        }
+        
+        // 备选复制方法（兼容旧浏览器）
+        function fallbackCopyTextToClipboard(text, btn, originalText) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.top = '0';
+            textArea.style.left = '0';
+            textArea.style.width = '2em';
+            textArea.style.height = '2em';
+            textArea.style.padding = '0';
+            textArea.style.border = 'none';
+            textArea.style.outline = 'none';
+            textArea.style.boxShadow = 'none';
+            textArea.style.background = 'transparent';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    if (btn) {
+                        btn.textContent = '✓ 已复制';
+                        btn.style.background = '#28a745';
+                        setTimeout(() => {
+                            btn.textContent = originalText;
+                            btn.style.background = '#007acc';
+                        }, 2000);
+                    }
+                } else {
+                    throw new Error('execCommand failed');
+                }
+            } catch (err) {
+                console.error('复制失败:', err);
+                // 最后尝试：直接选中代码让用户手动复制
+                const codeEl = document.getElementById('codeContent');
+                if (codeEl) {
+                    const range = document.createRange();
+                    range.selectNode(codeEl);
+                    window.getSelection().removeAllRanges();
+                    window.getSelection().addRange(range);
+                    alert('自动复制失败，代码已选中，请按 Ctrl+C (Windows) 或 Cmd+C (Mac) 手动复制');
+                } else {
+                    alert('复制失败，请手动复制代码');
+                }
+            } finally {
+                document.body.removeChild(textArea);
+            }
+        }
+
+        // 页面加载时初始化代码显示
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCodeDisplay();
+        });
+
         // 获取导出下载 URL（拼接域名）
         function getExportDownloadUrl(url) {
             if (!url) return url;
@@ -925,39 +1166,25 @@
             return config.exportDownloadDomain + '/' + url;
         }
 
-        // 加载数据列表
-        async function loadData() {
-            try {
-                const response = await fetch('/demo/list');
-                const result = await response.json();
-                if (result.code === 0 && result.data.list) {
-                    renderTable(result.data.list);
-                }
-            } catch (error) {
-                console.error('加载数据失败:', error);
-            }
-        }
 
-        function renderTable(data) {
-            const tbody = document.getElementById('tableBody');
-            if (data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 40px; color: #999;">暂无数据</td></tr>';
-                return;
-            }
-            tbody.innerHTML = data.map(item => `
-                <tr>
-                    <td>${item.id}</td>
-                    <td>${item.name}</td>
-                    <td>${item.email}</td>
-                    <td>${item.created_at}</td>
-                </tr>
-            `).join('');
-        }
+        // 当前导出的业务ID
+        let currentExportBusinessId = 'demoXlsWriterExport';
 
         // 打开导出弹窗
-        function openExportModal() {
+        function openExportModal(businessId = 'demoXlsWriterExport') {
+            currentExportBusinessId = businessId;
             const modal = document.getElementById('exportModal');
             modal.classList.add('active');
+            
+            // 更新弹窗标题
+            const modalTitle = modal.querySelector('.modal-title');
+            if (modalTitle) {
+                const titles = {
+                    'demoXlsWriterExport': '导出数据（XlsWriter驱动）',
+                    'demoSpreadSheetExport': '导出数据（SpreadSheet驱动）'
+                };
+                modalTitle.textContent = titles[businessId] || '导出数据';
+            }
             
             // 确保弹窗内容可见
             const modalBody = modal.querySelector('.modal-body');
@@ -1012,7 +1239,7 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        businessId: 'demoAsyncExport',
+                        businessId: currentExportBusinessId,
                         param: {}
                     })
                 });
@@ -1021,26 +1248,32 @@
                     exportToken = result.data.token;
                     addExportMessage('导出任务已创建', 'success');
                     
+                    // 初始化进度信息显示
+                    updateExportProgressInfo({
+                        total: 0,
+                        progress: 0,
+                        success: 0,
+                        fail: 0,
+                        status: '待处理',
+                        statusClass: 'status-1',
+                        percent: 0
+                    });
+                    
                     if (result.data.response) {
-                        // 同步导出完成
-                        updateExportProgress(100, '导出完成');
-                        addExportMessage('导出成功！', 'success');
+                        // 同步导出完成，但仍需要查询一次进度信息以显示完整数据
+                        updateExportProgress(95, '导出完成中...');
+                        // 立即查询一次进度，然后启动轮询以确保获取到最终状态
+                        pollExportProgress();
+                        startExportProgressPolling();
                         // 保存下载地址并显示下载按钮
                         exportDownloadUrl = getExportDownloadUrl(result.data.response);
-                        showExportDownloadButton();
+                        // 延迟显示下载按钮，等待进度查询完成
+                        setTimeout(() => {
+                            showExportDownloadButton();
+                        }, 500);
                     } else {
                         // 异步导出，开始轮询进度
                         updateExportProgress(5, '任务已提交，等待处理...');
-                        // 初始化进度信息显示
-                        updateExportProgressInfo({
-                            total: 0,
-                            progress: 0,
-                            success: 0,
-                            fail: 0,
-                            status: '待处理',
-                            statusClass: 'status-1',
-                            percent: 0
-                        });
                         startExportProgressPolling();
                     }
                 } else {
@@ -1110,13 +1343,13 @@
                         percent = 5;
                     }
                     
-                    // 状态映射：1待处理、2处理中、3处理完成、4处理失败、5正在输出、6完成
+                    // 状态映射：1待处理、2处理中、3输出上传中、4处理失败、5输出上传中、6完成
                     const statusMap = {
                         1: { text: '待处理', class: 'status-1' },
                         2: { text: '处理中', class: 'status-2' },
-                        3: { text: '处理完成', class: 'status-3' },
+                        3: { text: '输出上传中', class: 'status-3' },
                         4: { text: '处理失败', class: 'status-4' },
-                        5: { text: '正在输出', class: 'status-5' },
+                        5: { text: '输出上传中', class: 'status-5' },
                         6: { text: '完成', class: 'status-6' }
                     };
                     const statusInfo = statusMap[status] || { text: '未知', class: '' };
@@ -1602,7 +1835,6 @@
                         if (status === 6) {
                             // 完成状态
                             addImportMessage('导入完成！', 'success');
-                            loadData();
                         } else if (status === 4) {
                             // 处理失败
                             addImportMessage('导入失败', 'error');
