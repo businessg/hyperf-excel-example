@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Excel\Export;
 
 use App\Excel\Export\Base\AbstractExportConfig;
-use Vartruexuan\HyperfExcel\Data\Export\Column;
-use Vartruexuan\HyperfExcel\Data\Export\ExportCallbackParam;
-use Vartruexuan\HyperfExcel\Data\Export\Sheet;
+use BusinessG\BaseExcel\Data\Export\Column;
+use BusinessG\BaseExcel\Data\Export\ExportCallbackParam;
+use BusinessG\BaseExcel\Data\Export\Sheet;
 
 class DemoExportConfig extends AbstractExportConfig
 {

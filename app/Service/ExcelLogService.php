@@ -7,9 +7,9 @@ namespace App\Service;
 use App\Exception\BusinessException;
 use Hyperf\Collection\Arr;
 use Hyperf\Di\Annotation\Inject;
-use Vartruexuan\HyperfExcel\ExcelInterface;
-use Vartruexuan\HyperfExcel\Progress\ProgressData;
-use Vartruexuan\HyperfExcel\Progress\ProgressRecord;
+use BusinessG\BaseExcel\Progress\ProgressData;
+use BusinessG\BaseExcel\Progress\ProgressRecord;
+use BusinessG\BaseExcel\ExcelInterface;
 use function Hyperf\Config\config;
 
 class ExcelLogService extends AbstractService

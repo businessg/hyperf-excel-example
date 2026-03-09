@@ -24,7 +24,7 @@ class ExcelController extends AbstractController
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      * @throws \Throwable
-     * @throws \Vartruexuan\HyperfExcel\Exception\ExcelException
+     * @throws \BusinessG\BaseExcel\Exception\ExcelException
      */
     public function export(ExcelRequest $request)
     {
@@ -45,7 +45,7 @@ class ExcelController extends AbstractController
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      * @throws \Throwable
-     * @throws \Vartruexuan\HyperfExcel\Exception\ExcelException
+     * @throws \BusinessG\BaseExcel\Exception\ExcelException
      */
     public function import(ExcelRequest $request)
     {

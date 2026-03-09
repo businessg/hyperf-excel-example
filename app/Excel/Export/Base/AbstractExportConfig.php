@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Excel\Export\Base;
 
-use Vartruexuan\HyperfExcel\Data\Export\ExportConfig;
+use BusinessG\BaseExcel\Data\Export\ExportConfig;
 
 abstract class AbstractExportConfig extends ExportConfig
 {

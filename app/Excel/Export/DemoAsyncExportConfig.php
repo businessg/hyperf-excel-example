@@ -6,10 +6,10 @@ namespace App\Excel\Export;
 
 use App\Excel\Export\Base\AbstractExportConfig;
 use Hyperf\Context\ApplicationContext;
-use Vartruexuan\HyperfExcel\Data\Export\Column;
-use Vartruexuan\HyperfExcel\Data\Export\ExportCallbackParam;
-use Vartruexuan\HyperfExcel\Data\Export\Sheet;
-use Vartruexuan\HyperfExcel\Progress\ProgressInterface;
+use BusinessG\BaseExcel\Data\Export\Column;
+use BusinessG\BaseExcel\Data\Export\ExportCallbackParam;
+use BusinessG\BaseExcel\Data\Export\Sheet;
+use BusinessG\BaseExcel\Progress\ProgressInterface;
 
 class DemoAsyncExportConfig extends AbstractExportConfig
 {

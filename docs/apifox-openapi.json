@@ -1,0 +1,349 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Hyperf Excel Example API",
+    "description": "基于 hyperf-excel 的 Excel 导入导出示例接口文档",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:9502",
+      "description": "本地开发环境"
+    }
+  ],
+  "tags": [
+    { "name": "Excel", "description": "Excel 导入导出相关接口" },
+    { "name": "Demo", "description": "Demo 演示相关接口" }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "首页",
+        "tags": ["通用"],
+        "responses": {
+          "200": { "description": "成功" }
+        }
+      },
+      "post": {
+        "summary": "首页",
+        "tags": ["通用"],
+        "responses": {
+          "200": { "description": "成功" }
+        }
+      }
+    },
+    "/excel/export": {
+      "get": {
+        "summary": "导出数据",
+        "description": "创建导出任务，支持同步和异步两种模式。同步模式直接返回文件下载；异步模式返回 token 用于查询进度。",
+        "tags": ["Excel"],
+        "parameters": [
+          {
+            "name": "businessId",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "业务ID，如：demoExport、demoAsyncExport、demoImportTemplate"
+          },
+          {
+            "name": "param",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "object" },
+            "description": "导出参数（JSON 对象）"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": { "type": "integer", "example": 0 },
+                    "msg": { "type": "string", "example": "success" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "token": { "type": "string", "description": "任务 token" },
+                        "response": { "type": "string", "description": "同步上传时返回文件 URL" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "导出数据",
+        "description": "创建导出任务，支持同步和异步两种模式。",
+        "tags": ["Excel"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["businessId"],
+                "properties": {
+                  "businessId": { "type": "string", "description": "业务ID" },
+                  "param": { "type": "object", "description": "导出参数" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": { "type": "integer", "example": 0 },
+                    "msg": { "type": "string", "example": "success" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "token": { "type": "string" },
+                        "response": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/excel/import": {
+      "post": {
+        "summary": "导入数据",
+        "description": "创建导入任务，需要先上传文件获取 URL。",
+        "tags": ["Excel"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["businessId", "url"],
+                "properties": {
+                  "businessId": { "type": "string", "description": "业务ID，如：demoImport" },
+                  "url": { "type": "string", "format": "uri", "description": "Excel 文件 URL" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": { "type": "integer", "example": 0 },
+                    "msg": { "type": "string", "example": "success" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "token": { "type": "string", "description": "任务 token" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/excel/progress": {
+      "get": {
+        "summary": "查询进度",
+        "description": "根据 token 查询任务进度，返回总数、进度、成功数、失败数、状态等信息。",
+        "tags": ["Excel"],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "任务 token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": { "type": "integer", "example": 0 },
+                    "msg": { "type": "string", "example": "success" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "token": { "type": "string" },
+                        "progress": {
+                          "type": "object",
+                          "properties": {
+                            "total": { "type": "integer" },
+                            "progress": { "type": "integer" },
+                            "success": { "type": "integer" },
+                            "fail": { "type": "integer" },
+                            "status": { "type": "string" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/excel/message": {
+      "get": {
+        "summary": "查询消息",
+        "description": "根据 token 查询任务处理过程中的消息列表。",
+        "tags": ["Excel"],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "任务 token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": { "type": "integer", "example": 0 },
+                    "msg": { "type": "string", "example": "success" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "isEnd": { "type": "boolean", "description": "是否结束" },
+                        "message": {
+                          "type": "array",
+                          "items": { "type": "string" },
+                          "description": "消息列表"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/excel/info": {
+      "get": {
+        "summary": "获取业务信息",
+        "description": "根据 businessId 获取业务配置信息，包括模板下载地址等。",
+        "tags": ["Excel"],
+        "parameters": [
+          {
+            "name": "businessId",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "业务ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": { "type": "integer", "example": 0 },
+                    "msg": { "type": "string", "example": "success" },
+                    "data": {
+                      "type": "object",
+                      "description": "业务信息，如 templateBusinessId"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/demo/index": {
+      "get": {
+        "summary": "Demo 首页",
+        "description": "返回 Demo 演示页面 HTML",
+        "tags": ["Demo"],
+        "responses": {
+          "200": { "description": "成功" }
+        }
+      }
+    },
+    "/demo/list": {
+      "get": {
+        "summary": "数据列表",
+        "description": "数据列表 API",
+        "tags": ["Demo"],
+        "responses": {
+          "200": { "description": "成功" }
+        }
+      }
+    },
+    "/demo/upload": {
+      "post": {
+        "summary": "文件上传",
+        "description": "上传文件，返回文件相对路径",
+        "tags": ["Demo"],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": { "type": "string", "format": "binary" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "成功" }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApiResponse": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "integer", "example": 0 },
+          "msg": { "type": "string", "example": "success" },
+          "data": {}
+        }
+      }
+    }
+  }
+}

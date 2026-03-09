@@ -8,10 +8,10 @@ use App\Excel\Import\Base\AbstractImportConfig;
 use App\Exception\BusinessException;
 use Hyperf\Collection\Arr;
 use Hyperf\Context\ApplicationContext;
-use Vartruexuan\HyperfExcel\Data\Import\ImportRowCallbackParam;
-use Vartruexuan\HyperfExcel\Data\Import\Sheet;
-use Vartruexuan\HyperfExcel\Data\Import\Column;
-use Vartruexuan\HyperfExcel\Progress\ProgressInterface;
+use BusinessG\BaseExcel\Data\Import\Column;
+use BusinessG\BaseExcel\Data\Import\ImportRowCallbackParam;
+use BusinessG\BaseExcel\Data\Import\Sheet;
+use BusinessG\BaseExcel\Progress\ProgressInterface;
 
 class DemoImportConfig extends AbstractImportConfig
 {
