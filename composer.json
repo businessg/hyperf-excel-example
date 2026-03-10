@@ -63,6 +63,9 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "config": {
+        "platform": {
+            "php": "8.2.30"
+        },
         "optimize-autoloader": true,
         "sort-packages": true
     },
