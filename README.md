@@ -46,14 +46,25 @@
 | 依赖 | 版本 | 说明 |
 |---|---|---|
 | PHP | >= 8.1 | |
-| Swoole | >= 5.0 | |
+| Swoole | >= 5.0 | Hyperf 运行时 |
 | Hyperf | 3.x | |
-| ext-xlswriter | * | `pecl install xlswriter` |
-| ext-redis | * | |
-| Redis 服务 | 任意版本 | |
+| Redis 服务 | 任意版本 | 进度追踪和消息队列 |
 | MySQL | 5.7+ | 启用 dbLog 时需要 |
 
-### 1.2 安装
+### 1.2 PHP 扩展
+
+```bash
+# 验证所需扩展已安装
+php -m | grep -E "xlswriter|redis|mbstring|swoole"
+# 应输出：mbstring, redis, swoole, xlswriter
+
+# 如未安装 xlswriter：
+pecl install xlswriter
+# 如未安装 redis：
+pecl install redis
+```
+
+### 1.3 安装
 
 ```bash
 git clone https://github.com/businessg/hyperf-excel-example.git
@@ -62,7 +73,7 @@ cd hyperf-excel-example
 composer install
 ```
 
-### 1.3 配置环境变量
+### 1.4 配置环境变量
 
 编辑 `.env`：
 
@@ -84,7 +95,7 @@ REDIS_AUTH=
 REDIS_DB=0
 ```
 
-### 1.4 建表（可选，启用 dbLog 时需要）
+### 1.5 建表（可选，启用 dbLog 时需要）
 
 ```sql
 CREATE TABLE `excel_log` (
@@ -107,7 +118,7 @@ CREATE TABLE `excel_log` (
 ) ENGINE=InnoDB COMMENT='导入导出日志';
 ```
 
-### 1.5 启动服务
+### 1.6 启动服务
 
 ```bash
 php bin/hyperf.php start
