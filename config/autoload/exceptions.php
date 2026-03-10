@@ -12,6 +12,7 @@ declare(strict_types=1);
 return [
     'handler' => [
         'http' => [
+            BusinessG\HyperfExcel\Exception\Handler\ExcelExceptionHandler::class,
             Hyperf\HttpServer\Exception\Handler\HttpExceptionHandler::class,
             App\Exception\Handler\AppExceptionHandler::class,
         ],

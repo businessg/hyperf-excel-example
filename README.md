@@ -1,19 +1,6 @@
-# Hyperf Excel 使用示例
+# hyperf-excel-example
 
-基于 [businessg/hyperf-excel](https://github.com/businessg/hyperf-excel) 组件的完整使用示例项目，演示如何在 Hyperf 框架中**零代码**实现 Excel 导入导出功能。
-
-本项目采用**组件模式**：所有 Excel HTTP 接口（导出、导入、进度查询、消息查询、文件上传）均由组件自动注册，项目中无需编写 Controller 和 Service，只需配置即可使用。
-
-## 功能特性
-
-- 异步导出：大数据量异步导出，实时进度显示
-- 同步导出：同步生成文件并返回路径，或浏览器直接下载
-- 数据导入：Excel 文件导入，逐行校验，带进度追踪
-- 实时进度：进度条、总数、成功数、失败数实时更新
-- 消息输出：处理过程中的消息实时展示
-- 拖拽上传：支持文件拖拽上传
-- 模板下载：一键下载导入模板
-- CLI 命令：通过命令行直接执行导出/导入
+基于 [businessg/hyperf-excel](https://github.com/businessg/hyperf-excel) 组件的完整示例项目。展示**零代码模式**——仅通过配置即可实现同步/异步导入导出，无需编写 Controller 或 Service。
 
 ## 效果预览
 
@@ -31,225 +18,238 @@
 
 ---
 
-## 环境要求
+## 目录
 
-| 依赖 | 版本 |
-|---|---|
-| PHP | >= 8.1 |
-| Hyperf | ~3.1 |
-| ext-xlswriter | * (pecl install xlswriter) |
-| ext-redis | * |
-| Swoole / Swow | Hyperf 运行时 |
-| MySQL | 5.7+ |
-| Redis | 运行中 |
+- [1. 环境要求与安装](#1-环境要求与安装)
+- [2. 项目结构](#2-项目结构)
+- [3. 配置说明](#3-配置说明)
+  - [3.1 excel.php — 组件核心配置](#31-excelphp--组件核心配置)
+  - [3.2 excel_business.php — 业务配置](#32-excel_businessphp--业务配置)
+  - [3.3 exceptions.php — 异常处理器](#33-exceptionsphp--异常处理器)
+  - [3.4 listeners.php — 事件监听器](#34-listenersphp--事件监听器)
+- [4. API 接口参考](#4-api-接口参考)
+- [5. 快速上手](#5-快速上手)
+  - [5.1 同步导出](#51-同步导出)
+  - [5.2 浏览器直接下载导出](#52-浏览器直接下载导出)
+  - [5.3 异步导出](#53-异步导出)
+  - [5.4 完整导入流程](#54-完整导入流程)
+- [6. Demo UI 页面](#6-demo-ui-页面)
+- [7. 流程图](#7-流程图)
+- [8. 常见问题](#8-常见问题)
 
 ---
 
-## 快速开始
+## 1. 环境要求与安装
 
-### 1. 克隆项目
+### 1.1 环境要求
+
+| 依赖 | 版本 | 说明 |
+|---|---|---|
+| PHP | >= 8.1 | |
+| Swoole | >= 5.0 | |
+| Hyperf | 3.x | |
+| ext-xlswriter | * | `pecl install xlswriter` |
+| ext-redis | * | |
+| Redis 服务 | 任意版本 | |
+| MySQL | 5.7+ | 启用 dbLog 时需要 |
+
+### 1.2 安装
 
 ```bash
 git clone https://github.com/businessg/hyperf-excel-example.git
 cd hyperf-excel-example
-```
 
-### 2. 安装依赖
-
-```bash
 composer install
 ```
 
-### 3. 配置环境变量
+### 1.3 配置环境变量
 
-复制 `.env.example` 为 `.env`（或直接编辑 `.env`），配置数据库和 Redis：
+编辑 `.env`：
 
 ```env
-DB_DRIVER=mysql
+APP_NAME=hyperf-excel-example
+APP_URL=http://localhost:9501
+
+# MySQL（启用 dbLog 时需要）
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=your_database
+DB_DATABASE=hyperf_excel_example
 DB_USERNAME=root
-DB_PASSWORD=your_password
-DB_CHARSET=utf8mb4
-DB_COLLATION=utf8mb4_unicode_ci
+DB_PASSWORD=
 
+# Redis（进度追踪 + 异步队列）
 REDIS_HOST=127.0.0.1
-REDIS_AUTH=
 REDIS_PORT=6379
+REDIS_AUTH=
 REDIS_DB=0
-
-APP_URL=http://127.0.0.1:9501
 ```
 
-### 4. 创建数据库表
-
-执行 SQL 创建 `excel_log` 表（用于操作日志记录）：
+### 1.4 建表（可选，启用 dbLog 时需要）
 
 ```sql
 CREATE TABLE `excel_log` (
-    `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-    `token` varchar(64) NOT NULL DEFAULT '',
-    `type` enum('export','import') NOT NULL DEFAULT 'export',
-    `config_class` varchar(250) NOT NULL DEFAULT '',
-    `config` json DEFAULT NULL,
-    `service_name` varchar(20) NOT NULL DEFAULT '',
-    `sheet_progress` json DEFAULT NULL,
-    `progress` json DEFAULT NULL,
-    `status` tinyint unsigned NOT NULL DEFAULT '1',
-    `data` json NOT NULL,
-    `remark` varchar(500) NOT NULL DEFAULT '',
-    `url` varchar(300) NOT NULL DEFAULT '',
-    `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `id`              bigint unsigned NOT NULL AUTO_INCREMENT,
+    `token`           varchar(64)  NOT NULL DEFAULT '',
+    `type`            enum('export','import') NOT NULL DEFAULT 'export',
+    `config_class`    varchar(250) NOT NULL DEFAULT '',
+    `config`          json         DEFAULT NULL,
+    `service_name`    varchar(20)  NOT NULL DEFAULT '',
+    `sheet_progress`  json         DEFAULT NULL,
+    `progress`        json         DEFAULT NULL,
+    `status`          tinyint unsigned NOT NULL DEFAULT '1',
+    `data`            json         NOT NULL,
+    `remark`          varchar(500) NOT NULL DEFAULT '',
+    `url`             varchar(300) NOT NULL DEFAULT '',
+    `created_at`      timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at`      timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     UNIQUE KEY `uniq_token` (`token`)
 ) ENGINE=InnoDB COMMENT='导入导出日志';
 ```
 
-如不需要数据库日志，可在 `config/autoload/excel.php` 中关闭：
-
-```php
-'dbLog' => [
-    'enabled' => false,
-],
-```
-
-### 5. 启动服务
+### 1.5 启动服务
 
 ```bash
 php bin/hyperf.php start
 ```
 
-### 6. 访问 Demo 页面
-
-浏览器打开：
-
-```
-http://127.0.0.1:9501/demo/index
-```
+服务启动后监听 `http://localhost:9501`。
 
 ---
 
-## 项目结构
+## 2. 项目结构
 
 ```
 hyperf-excel-example/
 ├── app/
-│   ├── Controller/
-│   │   ├── DemoController.php         # Demo 页面控制器（视图渲染、文件上传）
-│   │   └── IndexController.php        # 首页
-│   │
-│   ├── Excel/                          # 项目自定义的 Excel 配置（可选）
-│   │   ├── Export/
-│   │   │   ├── DemoAsyncExportConfig.php      # 自定义异步导出配置
-│   │   │   ├── DemoExportConfig.php           # 自定义同步导出配置
-│   │   │   ├── DemoImportTemplateExportConfig.php
-│   │   │   └── Base/AbstractExportConfig.php
-│   │   └── Import/
-│   │       ├── DemoImportConfig.php           # 自定义导入配置
-│   │       └── Base/AbstractImportConfig.php
-│   │
-│   ├── Service/
-│   │   └── FileService.php            # 文件上传服务（Demo 页面使用）
-│   │
-│   └── View/
-│       └── demo/
-│           └── index.php              # Demo 演示页面（完整 UI）
-│
+│   └── View/demo/index.php       ← Demo UI 页面
 ├── config/
 │   └── autoload/
-│       ├── excel.php                  # 组件核心配置（驱动、队列、进度、HTTP 等）
-│       ├── excel_business.php         # 业务导入导出配置（business_id → Config 类映射）
-│       ├── exceptions.php             # 异常处理器配置（需将 ExcelExceptionHandler 放在最前）
-│       ├── async_queue.php            # 异步队列配置
-│       └── redis.php                  # Redis 配置
-│
-└── config/
-    └── routes.php                     # 路由配置（仅 Demo 页面路由）
+│       ├── excel.php              ← 组件核心配置
+│       ├── excel_business.php     ← 业务配置（注册导入导出）
+│       ├── exceptions.php         ← 异常处理器
+│       └── listeners.php          ← 事件监听器（路由注册）
+├── .env
+└── composer.json
 ```
 
-> **注意**：`/excel/*` 路由由组件自动注册，不在 `routes.php` 中，无需手动配置。
+> **零代码模式**：项目中不包含任何 ExcelController 或 ExcelService。
+> 所有导入导出逻辑由 `businessg/hyperf-excel` 组件自动注册和处理。
+> 所有 Demo 配置类均来自 `businessg/base-excel` 的 `Demo/` 目录。
 
 ---
 
-## 配置文件详解
+## 3. 配置说明
 
-### config/autoload/excel.php
-
-组件核心配置，关键项说明：
+### 3.1 excel.php — 组件核心配置
 
 ```php
+<?php
+// config/autoload/excel.php
+
+declare(strict_types=1);
+
 return [
+    // 默认驱动
     'default' => 'xlswriter',
 
+    // 驱动配置
     'drivers' => [
         'xlswriter' => [
-            'class' => \BusinessG\BaseExcel\Driver\XlsWriterDriver::class,
-            'disk' => 'local',
+            'class'     => \BusinessG\BaseExcel\Driver\XlsWriterDriver::class,
+            'disk'      => 'local',
             'exportDir' => 'export',
-            'tempDir' => null,
+            'tempDir'   => null,
         ],
     ],
 
+    // 日志通道
     'logging' => [
-        'channel' => 'hyperf-excel',    // 需在 logger.php 中配置对应 channel
-    ],
-
-    'queue' => [
-        'connection' => 'default',       // 对应 async_queue.php 中的 key
         'channel' => 'default',
     ],
 
-    'progress' => [
-        'enabled' => true,
-        'prefix' => 'HyperfExcel',
-        'ttl' => 3600,
-        'connection' => 'default',       // 对应 redis.php 中的 pool name
+    // 异步队列
+    'queue' => [
+        'connection' => 'default',
+        'channel'    => 'default',
     ],
 
+    // Redis 进度追踪
+    'progress' => [
+        'enabled'    => true,
+        'prefix'     => 'HyperfExcel',
+        'ttl'        => 3600,
+        'connection' => 'default',
+    ],
+
+    // 数据库日志
     'dbLog' => [
         'enabled' => true,
-        'model' => \BusinessG\HyperfExcel\Db\Model\ExcelLog::class,
+        'model'   => \BusinessG\HyperfExcel\Db\Model\ExcelLog::class,
     ],
 
+    // 临时文件清理
     'cleanup' => [
-        'enabled' => true,
-        'maxAge' => 1800,
+        'enabled'  => true,
+        'maxAge'   => 1800,
         'interval' => 3600,
     ],
 
-    // 核心：启用 HTTP 路由自动注册
+    // HTTP 路由与响应
     'http' => [
-        'enabled' => true,               // 必须设为 true
-        'prefix' => '',                  // 路由前缀（空 = /excel/export）
-        'middleware' => [],              // 中间件数组
-        'domain' => \Hyperf\Support\env('APP_URL', 'http://localhost:9501'),
-        'codeField' => 'code',
-        'dataField' => 'data',
+        'enabled'      => true,   // ⚠️ 启用自动路由
+        'prefix'       => '',     // 无前缀 → /excel/export
+        'middleware'    => [],
+        'domain'       => \Hyperf\Support\env('APP_URL', 'http://localhost:9501'),
+        'codeField'    => 'code',
+        'dataField'    => 'data',
         'messageField' => 'message',
-        'successCode' => 0,
+        'successCode'  => 0,
     ],
 ];
 ```
 
-### config/autoload/excel_business.php
+### 3.2 excel_business.php — 业务配置
 
-业务配置，注册所有可用的导入导出 business_id。本项目使用组件内置 Demo 配置：
+本示例使用 `base-excel` 提供的内置 Demo 配置：
 
 ```php
+<?php
+// config/autoload/excel_business.php
+
+declare(strict_types=1);
+
 return [
     'export' => [
-        'demoExport'          => ['config' => \BusinessG\BaseExcel\Demo\DemoExportConfig::class],
-        'demoExportOut'       => ['config' => \BusinessG\BaseExcel\Demo\DemoExportOutConfig::class],
-        'demoAsyncExport'     => ['config' => \BusinessG\BaseExcel\Demo\DemoAsyncExportConfig::class],
-        'demoExportForImport' => ['config' => \BusinessG\BaseExcel\Demo\DemoExportForImportConfig::class],
-        'demoImportTemplate'  => ['config' => \BusinessG\BaseExcel\Demo\DemoImportTemplateExportConfig::class],
+        // 同步导出：100 条虚拟数据 → 保存文件并返回路径
+        'demoExport' => [
+            'config' => \BusinessG\BaseExcel\Demo\DemoExportConfig::class,
+        ],
+        // 同步导出：20 条数据 → 浏览器直接下载（流输出）
+        'demoExportOut' => [
+            'config' => \BusinessG\BaseExcel\Demo\DemoExportOutConfig::class,
+        ],
+        // 异步导出：5 万条数据 → 后台队列处理 + 进度消息
+        'demoAsyncExport' => [
+            'config' => \BusinessG\BaseExcel\Demo\DemoAsyncExportConfig::class,
+        ],
+        // 同步导出：5 条数据 → 保存文件，用于导入测试
+        'demoExportForImport' => [
+            'config' => \BusinessG\BaseExcel\Demo\DemoExportForImportConfig::class,
+        ],
+        // 导入模板：同步 + 流输出，含说明行和样式
+        'demoImportTemplate' => [
+            'config' => \BusinessG\BaseExcel\Demo\DemoImportTemplateExportConfig::class,
+        ],
     ],
+
     'import' => [
+        // 导入：逐行校验姓名/邮箱 + 消息推送
         'demoImport' => [
             'config' => \BusinessG\BaseExcel\Demo\DemoImportConfig::class,
-            'info' => [
+            'info'   => [
+                // 动态模板：关联上方 demoImportTemplate 的 business_id
+                // info 接口会自动拼接为完整 URL
                 'templateBusinessId' => 'demoImportTemplate',
             ],
         ],
@@ -257,180 +257,192 @@ return [
 ];
 ```
 
-### config/autoload/exceptions.php
-
-**关键**：`ExcelExceptionHandler` 必须放在通用处理器之前：
+### 3.3 exceptions.php — 异常处理器
 
 ```php
+<?php
+// config/autoload/exceptions.php
+
 return [
     'handler' => [
         'http' => [
-            BusinessG\HyperfExcel\Exception\Handler\ExcelExceptionHandler::class,
-            Hyperf\HttpServer\Exception\Handler\HttpExceptionHandler::class,
-            App\Exception\Handler\AppExceptionHandler::class,
+            // ⚠️ Excel 异常处理器必须在通用处理器之前
+            \BusinessG\HyperfExcel\Exception\Handler\ExcelExceptionHandler::class,
+            \App\Exception\Handler\AppExceptionHandler::class,
         ],
     ],
 ];
 ```
 
----
+### 3.4 listeners.php — 事件监听器
 
-## 接口说明
+```php
+<?php
+// config/autoload/listeners.php
 
-### 组件自动注册的 Excel 接口
-
-以下接口由 `businessg/hyperf-excel` 组件自动注册（`http.enabled = true` 时生效）：
-
-| 方法 | 路径 | 参数 | 说明 |
-|---|---|---|---|
-| GET/POST | `/excel/export` | `business_id`, `param`(可选) | 触发导出 |
-| POST | `/excel/import` | `business_id`, `url` | 触发导入 |
-| GET | `/excel/progress` | `token` | 查询进度 |
-| GET | `/excel/message` | `token` | 获取消息 |
-| GET | `/excel/info` | `business_id` | 获取导入附加信息 |
-| POST | `/excel/upload` | `file` (multipart) | 上传 Excel 文件 |
-
-### Demo 页面接口
-
-以下接口由项目自身 `DemoController` 提供：
-
-| 方法 | 路径 | 说明 |
-|---|---|---|
-| GET | `/demo/index` | Demo 演示页面 |
-| GET | `/demo/list` | 数据列表 API（AJAX 刷新） |
-| POST | `/demo/upload` | Demo 文件上传（返回 filePath） |
-
-### 响应格式
-
-```json
-// 成功
-{"code": 0, "data": {...}, "message": ""}
-
-// 失败
-{"code": 500, "data": null, "message": "错误信息"}
+return [
+    // Excel 路由自动注册
+    \BusinessG\HyperfExcel\Listener\RegisterRouteListener::class,
+];
 ```
 
 ---
 
-## 使用示例
+## 4. API 接口参考
 
-### 同步导出（返回文件路径）
+`http.prefix = ''` 时路由如下：
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET/POST | `/excel/export` | 导出 |
+| POST | `/excel/import` | 导入 |
+| GET | `/excel/progress` | 进度查询 |
+| GET | `/excel/message` | 消息查询 |
+| GET | `/excel/info` | 导入信息（含模板 URL） |
+| POST | `/excel/upload` | 文件上传 |
+
+> 详细参数与响应格式请参考 [hyperf-excel 文档](https://github.com/businessg/hyperf-excel#3-api-接口参考)。
+
+---
+
+## 5. 快速上手
+
+### 5.1 同步导出
 
 ```bash
-curl -X POST http://127.0.0.1:9501/excel/export \
+curl -X POST http://localhost:9501/excel/export \
   -H "Content-Type: application/json" \
   -d '{"business_id": "demoExport"}'
 ```
 
-返回：
+**响应：**
 
 ```json
-{"code": 0, "data": {"token": "xxx", "response": "/path/to/export/file.xlsx"}, "message": ""}
+{
+    "code": 0,
+    "data": {
+        "token": "uuid-xxx",
+        "response": "/path/to/export/2026/03/demo.xlsx"
+    },
+    "message": ""
+}
 ```
 
-### 同步导出（浏览器直接下载）
+### 5.2 浏览器直接下载导出
 
-浏览器访问：
+直接在浏览器访问：
 
 ```
-http://127.0.0.1:9501/excel/export?business_id=demoExportOut
+http://localhost:9501/excel/export?business_id=demoExportOut
 ```
 
-直接触发文件下载。
+浏览器直接下载 xlsx 文件。
 
-### 异步导出（大数据量）
+### 5.3 异步导出
 
 ```bash
-# 1. 创建异步导出任务
-curl -X POST http://127.0.0.1:9501/excel/export \
+# 1. 创建异步任务
+curl -X POST http://localhost:9501/excel/export \
   -H "Content-Type: application/json" \
   -d '{"business_id": "demoAsyncExport"}'
-# → {"code":0,"data":{"token":"abc123","response":null}}
+# → {"code":0,"data":{"token":"uuid-xxx","response":null}}
 
-# 2. 轮询进度（每秒一次，直到 status=6 完成或 status=4 失败）
-curl "http://127.0.0.1:9501/excel/progress?token=abc123"
+# 2. 轮询进度（每秒一次，直到 status=6）
+curl "http://localhost:9501/excel/progress?token=uuid-xxx"
 
-# 3. 轮询消息
-curl "http://127.0.0.1:9501/excel/message?token=abc123"
+# 3. 获取实时消息
+curl "http://localhost:9501/excel/message?token=uuid-xxx"
+
+# 4. status=6 时 data.data.response 即为文件路径
 ```
 
-### 导入流程
+### 5.4 完整导入流程
 
 ```bash
-# 1. 获取导入信息（含模板地址）
-curl "http://127.0.0.1:9501/excel/info?business_id=demoImport"
-# → {"code":0,"data":{"templateUrl":"http://127.0.0.1:9501/excel/export?business_id=demoImportTemplate"}}
+# 1. 获取模板下载地址
+curl "http://localhost:9501/excel/info?business_id=demoImport"
+# → {"code":0,"data":{"templateUrl":"http://localhost:9501/excel/export?business_id=demoImportTemplate"}}
 
-# 2. 上传 Excel 文件
-curl -X POST http://127.0.0.1:9501/excel/upload -F "file=@test.xlsx"
-# → {"code":0,"data":{"path":"/runtime/excel-import/2026/03/10/xxx.xlsx","url":"..."}}
+# 2. 浏览器访问 templateUrl 下载模板
 
-# 3. 执行导入
-curl -X POST http://127.0.0.1:9501/excel/import \
+# 3. 填写数据后上传
+curl -X POST http://localhost:9501/excel/upload -F "file=@filled_template.xlsx"
+# → {"code":0,"data":{"path":"/full/path/to/file.xlsx","url":"/full/path/to/file.xlsx"}}
+
+# 4. 执行导入
+curl -X POST http://localhost:9501/excel/import \
   -H "Content-Type: application/json" \
-  -d '{"business_id": "demoImport", "url": "/runtime/excel-import/2026/03/10/xxx.xlsx"}'
+  -d '{"business_id": "demoImport", "url": "/full/path/to/file.xlsx"}'
+# → {"code":0,"data":{"token":"uuid-xxx"}}
 
-# 4. 轮询进度和消息（同导出）
-```
+# 5. 轮询进度
+curl "http://localhost:9501/excel/progress?token=uuid-xxx"
 
-### CLI 命令
-
-```bash
-# 导出
-php bin/hyperf.php excel:export "BusinessG\BaseExcel\Demo\DemoExportConfig"
-
-# 导入
-php bin/hyperf.php excel:import "BusinessG\BaseExcel\Demo\DemoImportConfig" "/path/to/file.xlsx"
-
-# 查询进度
-php bin/hyperf.php excel:progress {token}
-
-# 查询消息
-php bin/hyperf.php excel:message {token}
+# 6. 获取逐行处理消息
+curl "http://localhost:9501/excel/message?token=uuid-xxx"
+# → {"code":0,"data":{"isEnd":false,"message":["第3行: 张三 <zhangsan@test.com> 校验通过"]}}
 ```
 
 ---
 
-## 进度状态码
+## 6. Demo UI 页面
 
-| 状态值 | 名称 | 说明 |
-|---|---|---|
-| 1 | 待处理 | 任务已创建，等待处理 |
-| 2 | 处理中 | 正在处理数据 |
-| 3 | 处理完成 | 数据处理完成 |
-| 4 | 处理失败 | 处理过程中出错 |
-| 5 | 正在输出 | 正在生成文件 |
-| 6 | 完成 | 全部完成 |
+项目包含 HTML Demo 页面，提供可视化的导入导出测试界面。
 
----
+访问 `http://localhost:9501/demo`（需在 `config/routes.php` 中注册此路由）。
 
-## 内置 Demo 配置
-
-| business_id | 同步/异步 | 输出方式 | 说明 |
-|---|---|---|---|
-| `demoExport` | 同步 | UPLOAD | 100 条数据，返回文件路径 |
-| `demoExportOut` | 同步 | OUT | 20 条数据，浏览器直接下载 |
-| `demoAsyncExport` | 异步 | UPLOAD | 5 万条数据，带进度消息 |
-| `demoExportForImport` | 同步 | UPLOAD | 5 条测试数据，供导入测试 |
-| `demoImportTemplate` | 同步 | OUT | 带样式的导入模板 |
-| `demoImport` | 同步 | — | 逐行校验 + 消息推送 |
+UI 功能：
+- 下拉选择 business_id
+- 一键导出/异步导出
+- 实时进度条
+- 逐行消息展示
+- 拖拽上传 Excel 文件
+- 模板下载
+- Toast 通知（成功/失败/警告）
 
 ---
 
-## 技术栈
+## 7. 流程图
 
-- Hyperf 3.x
-- businessg/hyperf-excel（组件模式，自动注册路由）
-- businessg/base-excel（核心库）
-- Hyperf Async Queue（异步任务）
-- Redis（进度追踪）
-- 原生 JavaScript + CSS3（Demo UI）
+### 7.1 同步导出时序图
 
-## 相关链接
+![同步导出时序图](docs/img/sync-export.png)
 
-- [hyperf-excel 组件文档](https://github.com/businessg/hyperf-excel)
-- [base-excel 核心库](https://github.com/businessg/base-excel)
-- [Hyperf 官方文档](https://hyperf.wiki/)
+### 7.2 异步导出时序图
+
+![异步导出时序图](docs/img/async-export.png)
+
+### 7.3 导入流程时序图（含动态模板）
+
+![导入流程时序图](docs/img/import-flow.png)
+
+---
+
+## 8. 常见问题
+
+### Q: `Call to undefined function env()`
+
+Hyperf 中 `env()` 不是全局函数。请使用：
+
+```php
+\Hyperf\Support\env('APP_URL', 'http://localhost:9501')
+```
+
+### Q: 异步导出任务不执行
+
+检查 `config/autoload/async_queue.php` 是否存在且 `processes >= 1`。Hyperf AsyncQueue Worker 随主进程自动启动。
+
+### Q: 路由 404
+
+1. 确认 `config/autoload/excel.php` 中 `http.enabled = true`
+2. 确认 `config/autoload/listeners.php` 包含 `RegisterRouteListener::class`
+3. 重启 Hyperf 服务（路由在启动时注册）
+
+### Q: 异常处理器未生效
+
+确认 `config/autoload/exceptions.php` 中 `ExcelExceptionHandler` 排在其他处理器**前面**。Hyperf 异常处理器按数组顺序匹配，匹配到后即停止。
+
+---
 
 ## License
 

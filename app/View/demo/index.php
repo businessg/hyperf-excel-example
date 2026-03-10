@@ -746,6 +746,89 @@
             }
         }
 
+        /* Toast 提示 */
+        .toast-container {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast {
+            pointer-events: auto;
+            min-width: 300px;
+            max-width: 480px;
+            padding: 14px 20px;
+            border-radius: 10px;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            animation: toastIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            word-break: break-word;
+        }
+
+        .toast.removing {
+            animation: toastOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .toast-error {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        }
+
+        .toast-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .toast-warn {
+            background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+            color: #333;
+        }
+
+        .toast-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+            line-height: 1.2;
+        }
+
+        .toast-body {
+            flex: 1;
+            line-height: 1.4;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: inherit;
+            font-size: 18px;
+            cursor: pointer;
+            opacity: 0.7;
+            flex-shrink: 0;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .toast-close:hover {
+            opacity: 1;
+        }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(40px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes toastOut {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(40px); }
+        }
+
     </style>
 </head>
 <body>
@@ -888,15 +971,68 @@
         </div>
     </div>
 
+    <div class="toast-container" id="toastContainer"></div>
+
     <script>
+        // Toast 提示工具
+        function showToast(message, type = 'error', duration = 4000) {
+            const container = document.getElementById('toastContainer');
+            const icons = { error: '❌', success: '✅', warn: '⚠️' };
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <span class="toast-icon">${icons[type] || icons.error}</span>
+                <span class="toast-body">${message}</span>
+                <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('removing');
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        /**
+         * 统一请求封装：自动处理网络错误 + 业务错误码弹窗
+         * 返回 { ok: boolean, data: any, raw: object }
+         */
+        async function apiRequest(url, options = {}) {
+            let response;
+            try {
+                response = await fetch(url, options);
+            } catch (e) {
+                showToast('网络请求失败: ' + e.message, 'error');
+                throw e;
+            }
+
+            if (!response.ok) {
+                const text = await response.text().catch(() => '');
+                showToast(`请求失败 [HTTP ${response.status}]: ${text || response.statusText}`, 'error');
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            let result;
+            try {
+                result = await response.json();
+            } catch (e) {
+                showToast('响应解析失败，返回内容不是有效 JSON', 'error');
+                throw e;
+            }
+
+            if (result.code !== 0) {
+                showToast(result.message || result.msg || '请求失败 (code: ' + result.code + ')', 'error');
+                return { ok: false, data: result.data, raw: result };
+            }
+
+            return { ok: true, data: result.data, raw: result };
+        }
+
         // 配置信息
         const config = {
-            // 导出下载域名
             exportDownloadDomain: window.location.origin + '/upload',
-            // 上传文件域名
             uploadDomain: window.location.origin + '/upload'
         };
-        
+
         const API_BASE = '/excel';
         let exportToken = null;
         let importToken = null;
@@ -928,13 +1064,12 @@
         // 加载数据列表
         async function loadData() {
             try {
-                const response = await fetch('/demo/list');
-                const result = await response.json();
-                if (result.code === 0 && result.data.list) {
-                    renderTable(result.data.list);
+                const { ok, data } = await apiRequest('/demo/list');
+                if (ok && data.list) {
+                    renderTable(data.list);
                 }
             } catch (error) {
-                console.error('加载数据失败:', error);
+                // apiRequest 已弹窗
             }
         }
 
@@ -1005,50 +1140,36 @@
             try {
                 updateExportProgress(0, '正在创建导出任务...');
                 addExportMessage('开始导出...', '');
-                
-                const response = await fetch(`${API_BASE}/export`, {
+
+                const { ok, data, raw } = await apiRequest(`${API_BASE}/export`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        businessId: 'demoAsyncExport',
-                        param: {}
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ business_id: 'demoAsyncExport', param: {} })
                 });
-                const result = await response.json();
-                if (result.code === 0) {
-                    exportToken = result.data.token;
-                    addExportMessage('导出任务已创建', 'success');
-                    
-                    if (result.data.response) {
-                        // 同步导出完成
-                        updateExportProgress(100, '导出完成');
-                        addExportMessage('导出成功！', 'success');
-                        // 保存下载地址并显示下载按钮
-                        exportDownloadUrl = getExportDownloadUrl(result.data.response);
-                        showExportDownloadButton();
-                    } else {
-                        // 异步导出，开始轮询进度
-                        updateExportProgress(5, '任务已提交，等待处理...');
-                        // 初始化进度信息显示
-                        updateExportProgressInfo({
-                            total: 0,
-                            progress: 0,
-                            success: 0,
-                            fail: 0,
-                            status: '待处理',
-                            statusClass: 'status-1',
-                            percent: 0
-                        });
-                        startExportProgressPolling();
-                    }
-                } else {
-                    addExportMessage('导出失败: ' + result.msg, 'error');
+
+                if (!ok) {
+                    addExportMessage('导出失败: ' + (raw.message || '未知错误'), 'error');
                     updateExportProgress(0, '导出失败');
+                    return;
+                }
+
+                exportToken = data.token;
+                addExportMessage('导出任务已创建', 'success');
+
+                if (data.response) {
+                    updateExportProgress(100, '导出完成');
+                    addExportMessage('导出成功！', 'success');
+                    exportDownloadUrl = getExportDownloadUrl(data.response);
+                    showExportDownloadButton();
+                } else {
+                    updateExportProgress(5, '任务已提交，等待处理...');
+                    updateExportProgressInfo({
+                        total: 0, progress: 0, success: 0, fail: 0,
+                        status: '待处理', statusClass: 'status-1', percent: 0
+                    });
+                    startExportProgressPolling();
                 }
             } catch (error) {
-                console.error('导出失败:', error);
                 addExportMessage('导出失败: ' + error.message, 'error');
                 updateExportProgress(0, '导出失败');
             }
@@ -1078,90 +1199,64 @@
                 exportProgressInterval = null;
                 return;
             }
-            
+
             try {
-                // 查询进度接口
-                const response = await fetch(`${API_BASE}/progress?token=${exportToken}`);
-                const result = await response.json();
-                
-                if (result.code === 0) {
-                    // 确保正确获取进度数据，支持多种可能的数据结构
-                    const progress = result.data?.progress || {};
-                    const total = Number(progress.total) || 0;
-                    const progressCount = Number(progress.progress) || 0;
-                    const success = Number(progress.success) || 0;
-                    const fail = Number(progress.fail) || 0;
-                    const status = Number(progress.status) || 1;
-                    
-                    // 调试：打印API返回的完整数据（仅在开发时使用）
-                    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-                        console.log('导出进度API返回:', result);
-                        console.log('解析后的进度数据:', { total, progressCount, success, fail, status });
-                    }
-                    
-                    // 计算百分比
-                    let percent = 0;
-                    if (total > 0) {
-                        percent = Math.round((progressCount / total) * 100);
-                    } else if (status === 2 || status === 5) {
-                        // 处理中或正在输出时，即使没有总数也显示一个估算进度
-                        percent = progressCount > 0 ? Math.min(Math.round(progressCount / 10), 99) : 10;
-                    } else if (status === 1) {
-                        percent = 5;
-                    }
-                    
-                    // 状态映射：1待处理、2处理中、3处理完成、4处理失败、5正在输出、6完成
-                    const statusMap = {
-                        1: { text: '待处理', class: 'status-1' },
-                        2: { text: '处理中', class: 'status-2' },
-                        3: { text: '处理完成', class: 'status-3' },
-                        4: { text: '处理失败', class: 'status-4' },
-                        5: { text: '正在输出', class: 'status-5' },
-                        6: { text: '完成', class: 'status-6' }
-                    };
-                    const statusInfo = statusMap[status] || { text: '未知', class: '' };
-                    
-                    // 更新进度信息显示（确保每次都更新，即使值为0）
-                    updateExportProgressInfo({
-                        total,
-                        progress: progressCount,
-                        success,
-                        fail,
-                        status: statusInfo.text,
-                        statusClass: statusInfo.class,
-                        percent
-                    });
-                    
-                    // 更新进度条
-                    updateExportProgress(percent, `${statusInfo.text}${total > 0 ? ' (' + percent + '%)' : ''}`);
-                    
-                    // 根据状态终止进度轮询（状态4或6）
-                    if (status === 4 || status === 6) {
-                        clearInterval(exportProgressInterval);
-                        exportProgressInterval = null;
-                        
-                        if (status === 6) {
-                            // 完成状态，从 result.data.data.response 获取文件地址
-                            const fileResponse = result.data?.data?.response || '';
-                            if (fileResponse) {
-                                addExportMessage('导出成功！', 'success');
-                                exportDownloadUrl = getExportDownloadUrl(fileResponse);
-                                showExportDownloadButton();
-                            } else {
-                                addExportMessage('导出完成，但未获取到文件地址', 'error');
-                            }
-                        } else if (status === 4) {
-                            // 处理失败
-                            addExportMessage('导出失败', 'error');
-                            updateExportProgress(0, '导出失败');
+                const { ok, data, raw } = await apiRequest(`${API_BASE}/progress?token=${exportToken}`);
+                if (!ok) return;
+
+                const progress = data?.progress || {};
+                const total = Number(progress.total) || 0;
+                const progressCount = Number(progress.progress) || 0;
+                const success = Number(progress.success) || 0;
+                const fail = Number(progress.fail) || 0;
+                const status = Number(progress.status) || 1;
+
+                let percent = 0;
+                if (total > 0) {
+                    percent = Math.round((progressCount / total) * 100);
+                } else if (status === 2 || status === 5) {
+                    percent = progressCount > 0 ? Math.min(Math.round(progressCount / 10), 99) : 10;
+                } else if (status === 1) {
+                    percent = 5;
+                }
+
+                const statusMap = {
+                    1: { text: '待处理', class: 'status-1' },
+                    2: { text: '处理中', class: 'status-2' },
+                    3: { text: '处理完成', class: 'status-3' },
+                    4: { text: '处理失败', class: 'status-4' },
+                    5: { text: '正在输出', class: 'status-5' },
+                    6: { text: '完成', class: 'status-6' }
+                };
+                const statusInfo = statusMap[status] || { text: '未知', class: '' };
+
+                updateExportProgressInfo({
+                    total, progress: progressCount, success, fail,
+                    status: statusInfo.text, statusClass: statusInfo.class, percent
+                });
+                updateExportProgress(percent, `${statusInfo.text}${total > 0 ? ' (' + percent + '%)' : ''}`);
+
+                if (status === 4 || status === 6) {
+                    clearInterval(exportProgressInterval);
+                    exportProgressInterval = null;
+
+                    if (status === 6) {
+                        const fileResponse = data?.data?.response || '';
+                        if (fileResponse) {
+                            addExportMessage('导出成功！', 'success');
+                            exportDownloadUrl = getExportDownloadUrl(fileResponse);
+                            showExportDownloadButton();
+                        } else {
+                            showToast('导出完成，但未获取到文件地址', 'warn');
                         }
+                    } else {
+                        showToast('导出失败', 'error');
+                        addExportMessage('导出失败', 'error');
+                        updateExportProgress(0, '导出失败');
                     }
-                } else {
-                    addExportMessage('获取进度失败: ' + result.msg, 'error');
                 }
             } catch (error) {
-                console.error('获取进度失败:', error);
-                addExportMessage('获取进度失败: ' + error.message, 'error');
+                // apiRequest 已弹窗，此处仅补充消息面板
             }
         }
 
@@ -1172,25 +1267,21 @@
                 exportMessageInterval = null;
                 return;
             }
-            
+
             try {
-                const messageResponse = await fetch(`${API_BASE}/message?token=${exportToken}`);
-                const messageResult = await messageResponse.json();
-                if (messageResult.code === 0) {
-                    const messages = messageResult.data.message || [];
-                    if (messages.length > 0) {
-                        messages.forEach(msg => {
-                            addExportMessage(msg, msg.includes('失败') || msg.includes('错误') ? 'error' : '');
-                        });
-                    }
-                    // 根据 isEnd 终止消息轮询
-                    if (messageResult.data.isEnd === true) {
-                        clearInterval(exportMessageInterval);
-                        exportMessageInterval = null;
-                    }
+                const { ok, data } = await apiRequest(`${API_BASE}/message?token=${exportToken}`);
+                if (!ok) return;
+
+                const messages = data.message || [];
+                messages.forEach(msg => {
+                    addExportMessage(msg, msg.includes('失败') || msg.includes('错误') ? 'error' : '');
+                });
+                if (data.isEnd === true) {
+                    clearInterval(exportMessageInterval);
+                    exportMessageInterval = null;
                 }
             } catch (e) {
-                console.warn('获取消息失败:', e);
+                // apiRequest 已弹窗
             }
         }
 
@@ -1324,10 +1415,9 @@
         // 下载导出文件（在当前页面打开）
         function downloadExportFile() {
             if (exportDownloadUrl) {
-                // 在当前页面打开下载地址
                 window.location.href = exportDownloadUrl;
             } else {
-                alert('下载地址不存在');
+                showToast('下载地址不存在', 'warn');
             }
         }
 
@@ -1404,7 +1494,7 @@
                     fileInput.files = dataTransfer.files;
                     handleFileSelect(fileInput);
                 } else {
-                    alert('请选择 .xlsx 或 .xls 格式的文件');
+                    showToast('请选择 .xlsx 或 .xls 格式的文件', 'warn');
                 }
             }
         }
@@ -1412,32 +1502,18 @@
         // 下载模板
         async function downloadTemplate() {
             try {
-                const infoResponse = await fetch(`${API_BASE}/info?businessId=demoImport`);
-                const infoResult = await infoResponse.json();
-                if (infoResult.code === 0 && infoResult.data.templateBusinessId) {
-                    const templateBusinessId = infoResult.data.templateBusinessId;
-                    const response = await fetch(`${API_BASE}/export`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            businessId: templateBusinessId,
-                            param: {}
-                        })
-                    });
-                    const result = await response.json();
-                    if (result.code === 0 && result.data.response) {
-                        window.open(getExportDownloadUrl(result.data.response), '_blank');
-                    } else {
-                        alert('下载模板失败: ' + (result.msg || '未知错误'));
-                    }
-                } else {
-                    alert('获取模板信息失败');
+                const infoRes = await apiRequest(`${API_BASE}/info?business_id=demoImport`);
+                if (!infoRes.ok) return;
+
+                const templateUrl = infoRes.data.templateUrl;
+                if (templateUrl) {
+                    window.open(getExportDownloadUrl(templateUrl), '_blank');
+                    return;
                 }
+
+                showToast('获取模板信息失败：未配置模板地址', 'warn');
             } catch (error) {
-                console.error('下载模板失败:', error);
-                alert('下载模板失败: ' + error.message);
+                // apiRequest 已弹窗
             }
         }
 
@@ -1446,66 +1522,50 @@
             const fileInput = document.getElementById('importFile');
             const file = fileInput.files[0];
             if (!file) {
-                alert('请先选择文件');
+                showToast('请先选择文件', 'warn');
                 return;
             }
 
-            // 上传文件
             const formData = new FormData();
             formData.append('file', file);
-            
+
             try {
                 updateImportProgress(10, '上传文件中...');
                 addImportMessage('开始上传文件...', '');
-                
-                // 先上传文件获取URL
-                const uploadResponse = await fetch('/demo/upload', {
-                    method: 'POST',
-                    body: formData
-                });
-                const uploadResult = await uploadResponse.json();
-                
-                if (uploadResult.code !== 0) {
-                    throw new Error(uploadResult.msg || '文件上传失败');
+
+                const uploadRes = await apiRequest('/demo/upload', { method: 'POST', body: formData });
+                if (!uploadRes.ok) {
+                    addImportMessage('文件上传失败', 'error');
+                    updateImportProgress(0, '上传失败');
+                    return;
                 }
-                
-                // 获取文件路径，拼接完整地址
-                const filePath = uploadResult.data.filePath;
+
+                const filePath = uploadRes.data.filePath;
                 const fileUrl = config.uploadDomain + '/' + filePath.replace(/^\/+/, '');
-                
+
                 addImportMessage('文件上传成功', 'success');
                 updateImportProgress(30, '开始导入...');
-                
-                // 调用导入接口
-                const response = await fetch(`${API_BASE}/import`, {
+
+                const importRes = await apiRequest(`${API_BASE}/import`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        businessId: 'demoImport',
-                        url: fileUrl
-                    })
+                    body: JSON.stringify({ business_id: 'demoImport', url: fileUrl })
                 });
-                const result = await response.json();
-                
-                if (result.code === 0) {
-                    importToken = result.data.token;
-                    addImportMessage('导入任务已创建', 'success');
-                    // 初始化进度信息显示（导入初始没有总数）
-                    updateImportProgressInfo({
-                        total: 0,
-                        progress: 0,
-                        success: 0,
-                        fail: 0,
-                        status: '待处理',
-                        statusClass: 'status-1',
-                        percent: 0
-                    });
-                    startImportProgressPolling();
-                } else {
-                    throw new Error(result.msg || '导入失败');
+
+                if (!importRes.ok) {
+                    addImportMessage('导入失败: ' + (importRes.raw.message || '未知错误'), 'error');
+                    updateImportProgress(0, '导入失败');
+                    return;
                 }
+
+                importToken = importRes.data.token;
+                addImportMessage('导入任务已创建', 'success');
+                updateImportProgressInfo({
+                    total: 0, progress: 0, success: 0, fail: 0,
+                    status: '待处理', statusClass: 'status-1', percent: 0
+                });
+                startImportProgressPolling();
             } catch (error) {
-                console.error('导入失败:', error);
                 addImportMessage('导入失败: ' + error.message, 'error');
                 updateImportProgress(0, '导入失败');
             }
@@ -1535,86 +1595,61 @@
                 importProgressInterval = null;
                 return;
             }
-            
+
             try {
-                // 查询进度接口
-                const response = await fetch(`${API_BASE}/progress?token=${importToken}`);
-                const result = await response.json();
-                
-                if (result.code === 0) {
-                    const progress = result.data.progress || {};
-                    const total = progress.total || 0;
-                    const progressCount = progress.progress || 0;
-                    const success = progress.success || 0;
-                    const fail = progress.fail || 0;
-                    const status = progress.status || 1;
-                    
-                    // 计算百分比：导入初始没有总数，所以只有当总数大于0时才计算百分比
-                    let percent = 0;
-                    if (total > 0) {
-                        // 有总数时，根据进度数和总数计算百分比
-                        percent = Math.round((progressCount / total) * 100);
-                    } else {
-                        // 如果没有总数，根据状态显示进度
-                        // 状态2（处理中）或5（正在输出）时显示一个估算进度
-                        if (status === 2 || status === 5) {
-                            // 处理中时，根据已处理的进度数显示一个估算值（不超过99%）
-                            percent = progressCount > 0 ? Math.min(Math.round(progressCount / 10), 99) : 10;
-                        } else if (status === 1) {
-                            // 待处理时显示5%
-                            percent = 5;
-                        } else {
-                            // 其他状态保持当前进度或0
-                            percent = progressCount > 0 ? Math.min(Math.round(progressCount / 10), 99) : 0;
-                        }
-                    }
-                    
-                    // 状态映射：1待处理、2处理中、3处理完成、4处理失败、5正在输出、6完成
-                    const statusMap = {
-                        1: { text: '待处理', class: 'status-1' },
-                        2: { text: '处理中', class: 'status-2' },
-                        3: { text: '处理完成', class: 'status-3' },
-                        4: { text: '处理失败', class: 'status-4' },
-                        5: { text: '正在输出', class: 'status-5' },
-                        6: { text: '完成', class: 'status-6' }
-                    };
-                    const statusInfo = statusMap[status] || { text: '未知', class: '' };
-                    
-                    // 更新进度信息显示
-                    updateImportProgressInfo({
-                        total,
-                        progress: progressCount,
-                        success,
-                        fail,
-                        status: statusInfo.text,
-                        statusClass: statusInfo.class,
-                        percent
-                    });
-                    
-                    // 更新进度条
-                    updateImportProgress(percent, `${statusInfo.text} (${total > 0 ? percent + '%' : '处理中...'})`);
-                    
-                    // 根据状态终止进度轮询（状态4或6）
-                    if (status === 4 || status === 6) {
-                        clearInterval(importProgressInterval);
-                        importProgressInterval = null;
-                        
-                        if (status === 6) {
-                            // 完成状态
-                            addImportMessage('导入完成！', 'success');
-                            loadData();
-                        } else if (status === 4) {
-                            // 处理失败
-                            addImportMessage('导入失败', 'error');
-                            updateImportProgress(0, '导入失败');
-                        }
-                    }
+                const { ok, data } = await apiRequest(`${API_BASE}/progress?token=${importToken}`);
+                if (!ok) return;
+
+                const progress = data?.progress || {};
+                const total = Number(progress.total) || 0;
+                const progressCount = Number(progress.progress) || 0;
+                const success = Number(progress.success) || 0;
+                const fail = Number(progress.fail) || 0;
+                const status = Number(progress.status) || 1;
+
+                let percent = 0;
+                if (total > 0) {
+                    percent = Math.round((progressCount / total) * 100);
+                } else if (status === 2 || status === 5) {
+                    percent = progressCount > 0 ? Math.min(Math.round(progressCount / 10), 99) : 10;
+                } else if (status === 1) {
+                    percent = 5;
                 } else {
-                    addImportMessage('获取进度失败: ' + result.msg, 'error');
+                    percent = progressCount > 0 ? Math.min(Math.round(progressCount / 10), 99) : 0;
+                }
+
+                const statusMap = {
+                    1: { text: '待处理', class: 'status-1' },
+                    2: { text: '处理中', class: 'status-2' },
+                    3: { text: '处理完成', class: 'status-3' },
+                    4: { text: '处理失败', class: 'status-4' },
+                    5: { text: '正在输出', class: 'status-5' },
+                    6: { text: '完成', class: 'status-6' }
+                };
+                const statusInfo = statusMap[status] || { text: '未知', class: '' };
+
+                updateImportProgressInfo({
+                    total, progress: progressCount, success, fail,
+                    status: statusInfo.text, statusClass: statusInfo.class, percent
+                });
+                updateImportProgress(percent, `${statusInfo.text} (${total > 0 ? percent + '%' : '处理中...'})`);
+
+                if (status === 4 || status === 6) {
+                    clearInterval(importProgressInterval);
+                    importProgressInterval = null;
+
+                    if (status === 6) {
+                        showToast('导入完成！', 'success');
+                        addImportMessage('导入完成！', 'success');
+                        loadData();
+                    } else {
+                        showToast('导入失败', 'error');
+                        addImportMessage('导入失败', 'error');
+                        updateImportProgress(0, '导入失败');
+                    }
                 }
             } catch (error) {
-                console.error('获取进度失败:', error);
-                addImportMessage('获取进度失败: ' + error.message, 'error');
+                // apiRequest 已弹窗
             }
         }
 
@@ -1625,25 +1660,21 @@
                 importMessageInterval = null;
                 return;
             }
-            
+
             try {
-                const messageResponse = await fetch(`${API_BASE}/message?token=${importToken}`);
-                const messageResult = await messageResponse.json();
-                if (messageResult.code === 0) {
-                    const messages = messageResult.data.message || [];
-                    if (messages.length > 0) {
-                        messages.forEach(msg => {
-                            addImportMessage(msg, msg.includes('失败') || msg.includes('错误') ? 'error' : '');
-                        });
-                    }
-                    // 根据 isEnd 终止消息轮询
-                    if (messageResult.data.isEnd === true) {
-                        clearInterval(importMessageInterval);
-                        importMessageInterval = null;
-                    }
+                const { ok, data } = await apiRequest(`${API_BASE}/message?token=${importToken}`);
+                if (!ok) return;
+
+                const messages = data.message || [];
+                messages.forEach(msg => {
+                    addImportMessage(msg, msg.includes('失败') || msg.includes('错误') ? 'error' : '');
+                });
+                if (data.isEnd === true) {
+                    clearInterval(importMessageInterval);
+                    importMessageInterval = null;
                 }
             } catch (e) {
-                console.warn('获取消息失败:', e);
+                // apiRequest 已弹窗
             }
         }
 

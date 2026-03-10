@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c13646beaeb90eba171ab9a6086858f0",
+    "content-hash": "e4335c0fe0453aca3ec6321079156e87",
     "packages": [
         {
             "name": "brick/math",
@@ -72,16 +72,18 @@
             "dist": {
                 "type": "path",
                 "url": "../base-excel",
-                "reference": "4ce4c75432a18ca27fdc1fafaf971fed79ad11f1"
+                "reference": "31897527872029c63aa8aa606845a06bc807931e"
             },
             "require": {
                 "ext-mbstring": "*",
+                "ext-redis": "*",
                 "ext-xlswriter": "*",
                 "league/flysystem": "^3.0",
                 "overtrue/http": "^1.2",
                 "php": ">=8.1",
                 "psr/container": "^1.0 || ^2.0",
                 "psr/event-dispatcher": "^1.0",
+                "psr/log": "^1.0 || ^2.0 || ^3.0",
                 "ramsey/uuid": "*",
                 "symfony/console": "^6.0|^7.0"
             },
@@ -89,6 +91,9 @@
                 "friendsofphp/php-cs-fixer": "^3.0",
                 "phpstan/phpstan": "^1.0",
                 "phpunit/phpunit": ">=9.0"
+            },
+            "suggest": {
+                "predis/predis": "Use predis driver for progress storage (progress.driver=predis)"
             },
             "type": "library",
             "autoload": {
@@ -104,6 +109,87 @@
                 "excel",
                 "export",
                 "framework-agnostic",
+                "import",
+                "php"
+            ],
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
+            "name": "businessg/hyperf-excel",
+            "version": "dev-feature/base-excel",
+            "dist": {
+                "type": "path",
+                "url": "../hyperf-excel",
+                "reference": "0ebb84399217fe62c45010448edefdfae25560df"
+            },
+            "require": {
+                "businessg/base-excel": "*",
+                "ext-mbstring": "*",
+                "hyperf/async-queue": "~3.1.0",
+                "hyperf/codec": "~3.1.0",
+                "hyperf/command": "~3.1.0",
+                "hyperf/contract": "~3.1.0",
+                "hyperf/event": "~3.1.0",
+                "hyperf/filesystem": "~3.1.0",
+                "hyperf/logger": "~3.1.0",
+                "hyperf/redis": "~3.1.0",
+                "hyperf/support": "~3.1.0",
+                "overtrue/http": "^1.2",
+                "php": ">=8.1",
+                "psr/container": "^1.0 || ^2.0",
+                "psr/event-dispatcher": "^1.0",
+                "ramsey/uuid": "*"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.0",
+                "mockery/mockery": "^1.0",
+                "phpstan/phpstan": "^1.0",
+                "phpunit/phpunit": ">=7.0",
+                "swoole/ide-helper": "^4.5"
+            },
+            "suggest": {
+                "swow/swow": "Required to create swow components."
+            },
+            "type": "library",
+            "extra": {
+                "hyperf": {
+                    "config": "BusinessG\\HyperfExcel\\ConfigProvider"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "BusinessG\\HyperfExcel\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "HyperfTest\\": "tests"
+                },
+                "files": [
+                    "./src/Functions.php"
+                ]
+            },
+            "scripts": {
+                "test": [
+                    "phpunit -c phpunit.xml --colors=always"
+                ],
+                "analyse": [
+                    "phpstan analyse --memory-limit 1024M -l 0 ./src"
+                ],
+                "cs-fix": [
+                    "php-cs-fixer fix $1"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Excel 同步/异步智能配置导入导出组件，为 Hyperf 框架提供强大的 Excel 处理能力,支持无限极列头配置,页码、列头、列样式配置。",
+            "keywords": [
+                "excel",
+                "export",
+                "hyperf",
                 "import",
                 "php"
             ],
@@ -7310,87 +7396,6 @@
             "time": "2025-07-15T13:41:35+00:00"
         },
         {
-            "name": "vartruexuan/hyperf-excel",
-            "version": "dev-feature/base-excel",
-            "dist": {
-                "type": "path",
-                "url": "../hyperf-excel",
-                "reference": "c4b9edc63736f02fbca7579bc93abc48cfed53c0"
-            },
-            "require": {
-                "businessg/base-excel": "*",
-                "ext-mbstring": "*",
-                "hyperf/async-queue": "~3.1.0",
-                "hyperf/codec": "~3.1.0",
-                "hyperf/command": "~3.1.0",
-                "hyperf/contract": "~3.1.0",
-                "hyperf/event": "~3.1.0",
-                "hyperf/filesystem": "~3.1.0",
-                "hyperf/logger": "~3.1.0",
-                "hyperf/redis": "~3.1.0",
-                "hyperf/support": "~3.1.0",
-                "overtrue/http": "^1.2",
-                "php": ">=8.1",
-                "psr/container": "^1.0 || ^2.0",
-                "psr/event-dispatcher": "^1.0",
-                "ramsey/uuid": "*"
-            },
-            "require-dev": {
-                "friendsofphp/php-cs-fixer": "^3.0",
-                "mockery/mockery": "^1.0",
-                "phpstan/phpstan": "^1.0",
-                "phpunit/phpunit": ">=7.0",
-                "swoole/ide-helper": "^4.5"
-            },
-            "suggest": {
-                "swow/swow": "Required to create swow components."
-            },
-            "type": "library",
-            "extra": {
-                "hyperf": {
-                    "config": "Vartruexuan\\HyperfExcel\\ConfigProvider"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Vartruexuan\\HyperfExcel\\": "src/"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "HyperfTest\\": "tests"
-                },
-                "files": [
-                    "./src/Functions.php"
-                ]
-            },
-            "scripts": {
-                "test": [
-                    "phpunit -c phpunit.xml --colors=always"
-                ],
-                "analyse": [
-                    "phpstan analyse --memory-limit 1024M -l 0 ./src"
-                ],
-                "cs-fix": [
-                    "php-cs-fixer fix $1"
-                ]
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "Excel 同步/异步智能配置导入导出组件，为 Hyperf 框架提供强大的 Excel 处理能力,支持无限极列头配置,页码、列头、列样式配置。",
-            "keywords": [
-                "excel",
-                "export",
-                "hyperf",
-                "import",
-                "php"
-            ],
-            "transport-options": {
-                "relative": true
-            }
-        },
-        {
             "name": "vlucas/phpdotenv",
             "version": "v5.6.3",
             "source": {
@@ -11158,7 +11163,7 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "vartruexuan/hyperf-excel": 20
+        "businessg/hyperf-excel": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,
