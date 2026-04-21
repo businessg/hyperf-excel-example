@@ -1,6 +1,16 @@
 {
     "name": "hyperf/hyperf-skeleton",
     "type": "project",
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../base-excel"
+        },
+        {
+            "type": "path",
+            "url": "../hyperf-excel"
+        }
+    ],
     "keywords": [
         "php",
         "swoole",
@@ -32,7 +42,8 @@
         "hyperf/process": "~3.1.0",
         "hyperf/redis": "~3.1.0",
         "hyperf/validation": "~3.1.0",
-        "businessg/hyperf-excel": "~1.0.0"
+        "businessg/base-excel": "*",
+        "businessg/hyperf-excel": "*"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.0",
