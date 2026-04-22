@@ -102,14 +102,12 @@ return [
     | 事件监听器（Hyperf Event）
     |--------------------------------------------------------------------------
     |
-    | 监听器类名列表（通常为 Hyperf 适配器类）。若本项非空，ConfigProvider 优先使用此处；
-    | 否则使用包内 publish/excel.php 中的 listeners 或内置默认列表。
+    | 需额外监听器时在此填写类名；不配置本项或写空数组 [] 时保持组件默认行为。
+    | 需要把导入导出过程打到日志时，取消下面一行的注释；修改后请重新启动服务。
     |
     */
     'listeners' => [
-        \BusinessG\HyperfExcel\Listener\HyperfProgressListener::class,
-        \BusinessG\HyperfExcel\Listener\HyperfExcelLogDbListener::class,
-        \BusinessG\HyperfExcel\Listener\RegisterRouteListener::class,
+        // \BusinessG\HyperfExcel\Listener\HyperfExcelLogListener::class,
     ],
 
     /*
